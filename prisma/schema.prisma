@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model GroceryStore {
+  id         String      @id @default(cuid())
+  slug       String      @unique
+  name       String
+  merchant   String
+  logoUrl    String?
+  provider   String      @default("flipp")
+  enabled    Boolean     @default(true)
+  config     Json        @default("{}")
+  sortOrder  Int         @default(0)
+  promotions Promotion[]
+  syncLogs   PromotionSyncLog[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model Promotion {
+  id           String       @id @default(cuid())
+  storeId      String
+  store        GroceryStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  externalId   String
+  name         String
+  brand        String?
+  category     String?
+  salePrice    Decimal?     @db.Decimal(10, 2)
+  regularPrice Decimal?     @db.Decimal(10, 2)
+  unit         String?
+  discountPct  Int?
+  imageUrl     String?
+  validFrom    DateTime
+  validTo      DateTime
+  isFood       Boolean      @default(true)
+  rawData      Json?
+  syncedAt     DateTime     @default(now())
+
+  @@unique([storeId, externalId])
+  @@index([storeId, validFrom, validTo])
+  @@index([isFood, validTo])
+}
+
+model PromotionSyncLog {
+  id        String       @id @default(cuid())
+  storeId   String
+  store     GroceryStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  status    String
+  itemCount Int          @default(0)
+  error     String?
+  syncedAt  DateTime     @default(now())
+
+  @@index([storeId, syncedAt])
+}
+
+model Household {
+  id          String           @id @default("default")
+  postalCode  String           @default("G1V4P3")
+  preferences UserPreferences?
+  recipePlans RecipePlan[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model UserPreferences {
+  id                     String    @id @default(cuid())
+  householdId            String    @unique
+  household              Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  allergies              String[]  @default([])
+  diets                  String[]  @default([])
+  likedFoods             String[]  @default([])
+  dislikedFoods          String[]  @default([])
+  maxPrepMinutes         Int       @default(60)
+  weeklyBudget           Decimal   @default(150) @db.Decimal(10, 2)
+  /// "recipes_only" = recettes sans objectifs nutritionnels, "guided" = objectifs pris en compte
+  nutritionMode          String    @default("recipes_only")
+  /// "bulking" | "cutting" | "maintenance" — utilisé quand nutritionMode = "guided"
+  fitnessGoal            String?
+  /// Objectif calorique journalier explicite (null = estimation auto selon objectif + activité)
+  dailyCalorieTarget     Int?
+  activityGym            Boolean   @default(false)
+  activityRunning        Boolean   @default(false)
+  gymSessionsPerWeek     Int?
+  runningSessionsPerWeek Int?
+  updatedAt              DateTime  @updatedAt
+}
+
+model RecipePlan {
+  id           String        @id @default(cuid())
+  householdId  String        @default("default")
+  household    Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  recipeCount  Int
+  status       String        @default("draft")
+  createdAt    DateTime      @default(now())
+  recipes      Recipe[]
+  shoppingList ShoppingList?
+
+  @@index([householdId, createdAt])
+}
+
+model Recipe {
+  id            String     @id @default(cuid())
+  planId        String
+  plan          RecipePlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  name          String
+  description   String
+  prepMinutes   Int
+  difficulty    String
+  estimatedCost Decimal    @db.Decimal(10, 2)
+  calories      Int?
+  proteinG      Decimal?   @db.Decimal(6, 1)
+  carbsG        Decimal?   @db.Decimal(6, 1)
+  fatG          Decimal?   @db.Decimal(6, 1)
+  ingredients   Json
+  steps         String[]
+  selected      Boolean    @default(true)
+  isFavorite    Boolean    @default(false)
+  makeRegularly Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+
+  @@index([planId])
+  @@index([isFavorite])
+  @@index([makeRegularly])
+}
+
+model ShoppingList {
+  id        String     @id @default(cuid())
+  planId    String     @unique
+  plan      RecipePlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  items     Json
+  createdAt DateTime   @default(now())
+}

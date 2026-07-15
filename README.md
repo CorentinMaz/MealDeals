@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MealDeals
 
-## Getting Started
+Next.js web app that generates weekly recipes based on Quebec grocery store promotions.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router) + TypeScript
+- TailwindCSS + shadcn/ui
+- Prisma + PostgreSQL
+- Anthropic Claude / OpenAI (configurable via `AI_PROVIDER`)
+
+## Quick start
 
 ```bash
+npm install
+cp .env.example .env
+
+# Start PostgreSQL (Docker)
+docker compose up -d
+
+npm run db:generate
+npm run db:push
+npm run db:seed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app runs at **http://localhost:4782** (PostgreSQL on port **5434**, Prisma Studio on **4783**).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Automatic flyer sync (Flipp API)
+- Grocery store management (Maxi, Super C, IGA, Metro, Provigo, Walmart)
+- Dietary preferences (allergies, diets, budget, prep time)
+- AI recipe generation based on current promotions
+- Categorized shopping list
 
-## Learn More
+## Architecture
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/(app)/          # Pages: dashboard, promotions, recipes, results, settings
+  components/         # UI and feature components
+  lib/
+    promotions/       # Providers (Flipp) + sync service
+    ai/               # Pluggable AI client
+    shopping-list/    # Shopping list generation
+  server/
+    actions/          # Server Actions
+    queries/          # Server queries
+  generated/prisma/   # Generated Prisma client
+prisma/
+  schema.prisma
+  seed.ts
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Promotion source
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Flyers are fetched via the **Flipp NG** API (`flyers-ng.flippback.com`), used by most Quebec retailers (Maxi, Metro, Super C, IGA, Provigo, Walmart).
 
-## Deploy on Vercel
+## Planned improvements
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Multi-user authentication
+- Meal calendar
+- PDF export
+- Favorites and notifications
