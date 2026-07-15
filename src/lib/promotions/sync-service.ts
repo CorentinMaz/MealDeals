@@ -1,4 +1,6 @@
 import { db } from "@/lib/db";
+import { createAppError, formatAppErrorMessage, parseAppError } from "@/lib/errors";
+import { getServerLocale, getServerTranslator } from "@/lib/i18n/server";
 import { flippProvider } from "@/lib/promotions/providers/flipp";
 import type { PromotionProvider, RawPromotion } from "@/lib/promotions/types";
 import type { Prisma } from "@/generated/prisma/client";
@@ -10,9 +12,24 @@ const providers: Record<string, PromotionProvider> = {
 function getProvider(providerId: string): PromotionProvider {
   const provider = providers[providerId];
   if (!provider) {
-    throw new Error(`Fournisseur de promotions non pris en charge : ${providerId}`);
+    throw createAppError("UNSUPPORTED_PROMOTION_PROVIDER", { providerId });
   }
   return provider;
+}
+
+async function resolveErrorMessage(error: unknown): Promise<string> {
+  const t = await getServerTranslator();
+  const parsed = parseAppError(error);
+
+  if (parsed) {
+    return formatAppErrorMessage(parsed.code, t, parsed.params);
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return formatAppErrorMessage("SYNC_UNKNOWN_ERROR", t);
 }
 
 export async function syncStorePromotions(
@@ -21,15 +38,17 @@ export async function syncStorePromotions(
 ): Promise<{ itemCount: number }> {
   const store = await db.groceryStore.findUnique({ where: { id: storeId } });
   if (!store) {
-    throw new Error("Épicerie introuvable");
+    throw createAppError("STORE_NOT_FOUND");
   }
 
   try {
+    const locale = await getServerLocale();
     const provider = getProvider(store.provider);
     const promotions = await provider.fetchPromotions({
       merchant: store.merchant,
       postalCode,
       config: store.config as Record<string, unknown>,
+      locale,
     });
 
     await persistPromotions(store.id, promotions);
@@ -44,8 +63,7 @@ export async function syncStorePromotions(
 
     return { itemCount: promotions.length };
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Erreur de synchronisation inconnue";
+    const message = await resolveErrorMessage(error);
 
     await db.promotionSyncLog.create({
       data: {
@@ -67,6 +85,7 @@ export async function syncAllEnabledStores(postalCode: string) {
   });
 
   const results = [];
+  const t = await getServerTranslator();
 
   for (const store of stores) {
     try {
@@ -83,7 +102,10 @@ export async function syncAllEnabledStores(postalCode: string) {
         storeName: store.name,
         status: "error" as const,
         itemCount: 0,
-        error: error instanceof Error ? error.message : "Erreur inconnue",
+        error:
+          error instanceof Error
+            ? await resolveErrorMessage(error)
+            : formatAppErrorMessage("SYNC_UNKNOWN_ERROR_PER_STORE", t),
       });
     }
   }

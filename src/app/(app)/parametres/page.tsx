@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { getSettingsData } from "@/server/queries";
 
 export const dynamic = "force-dynamic";
@@ -20,23 +21,25 @@ export const dynamic = "force-dynamic";
 export default async function SettingsPage() {
   const { stores, household } = await getSettingsData();
   const preferences = household?.preferences;
+  const t = await getServerTranslator();
 
   return (
     <PageShell width="lg">
       <div className="space-y-6">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">Paramètres</h1>
+          <h1 className="text-xl font-semibold tracking-tight">
+            {t("pages.settings.title")}
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Gérez vos épiceries, votre localisation et vos préférences
-            alimentaires.
+            {t("pages.settings.subtitle")}
           </p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Localisation</CardTitle>
+            <CardTitle>{t("pages.settings.location")}</CardTitle>
             <CardDescription>
-              Le code postal détermine quelles circulaires sont récupérées.
+              {t("pages.settings.locationDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -46,10 +49,9 @@ export default async function SettingsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Épiceries</CardTitle>
+            <CardTitle>{t("pages.settings.stores")}</CardTitle>
             <CardDescription>
-              Activez ou désactivez les magasins à inclure dans la
-              synchronisation.
+              {t("pages.settings.storesDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -72,12 +74,9 @@ export default async function SettingsPage() {
           <>
             <Card>
               <CardHeader>
-                <CardTitle>Objectifs nutritionnels</CardTitle>
+                <CardTitle>{t("pages.settings.nutritionGoals")}</CardTitle>
                 <CardDescription>
-                  Définissez votre objectif (prise de masse, perte de poids,
-                  etc.), votre activité physique et optionnellement un objectif
-                  calorique. Vous pouvez aussi choisir de générer des recettes
-                  sans contrainte nutritionnelle.
+                  {t("pages.settings.nutritionGoalsDescription")}
                 </CardDescription>
                 <NutritionGoalsSummary preferences={preferences} />
               </CardHeader>
@@ -88,10 +87,9 @@ export default async function SettingsPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Préférences alimentaires</CardTitle>
+                <CardTitle>{t("pages.settings.foodPreferences")}</CardTitle>
                 <CardDescription>
-                  Ces contraintes sont transmises à l&apos;IA lors de la
-                  génération des recettes.
+                  {t("pages.settings.foodPreferencesDescription")}
                 </CardDescription>
               </CardHeader>
               <CardContent>

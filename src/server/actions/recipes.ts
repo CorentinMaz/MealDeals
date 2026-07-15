@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { createAppError } from "@/lib/errors";
 import { db } from "@/lib/db";
 import { generateRecipesFromPromotions } from "@/lib/ai/recipe-generator";
 import { getActivePromotions } from "@/lib/promotions/sync-service";
@@ -16,7 +17,7 @@ export async function generateRecipesAction(recipeCount: number) {
   });
 
   if (!household?.preferences) {
-    throw new Error("Préférences utilisateur introuvables");
+    throw createAppError("PREFERENCES_NOT_FOUND");
   }
 
   const [promotions, savedRecipes] = await Promise.all([
@@ -25,9 +26,7 @@ export async function generateRecipesAction(recipeCount: number) {
   ]);
 
   if (promotions.length === 0) {
-    throw new Error(
-      "Aucune promotion active. Synchronisez d'abord les circulaires.",
-    );
+    throw createAppError("NO_ACTIVE_PROMOTIONS");
   }
 
   const generated = await generateRecipesFromPromotions({

@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslate } from "@/components/providers/locale-provider";
+import { getErrorMessage } from "@/lib/errors";
 import { generateRecipesAction } from "@/server/actions/recipes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,26 +25,29 @@ export function GenerateRecipesForm({
 }) {
   const [recipeCount, setRecipeCount] = useState("5");
   const [isPending, startTransition] = useTransition();
+  const t = useTranslate();
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Générer votre menu de la semaine</CardTitle>
+        <CardTitle>{t("pages.recipes.cardTitle")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <p className="text-sm text-muted-foreground">
           {promotionCount > 0
-            ? `${promotionCount} promotions actives seront utilisées pour créer des recettes économiques.`
-            : "Synchronisez d'abord les circulaires pour générer des recettes basées sur les promotions."}
+            ? t("pages.recipes.promotionsAvailable", { count: promotionCount })
+            : t("pages.recipes.syncFirst")}
         </p>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Nombre de recettes</label>
+          <label className="text-sm font-medium">
+            {t("pages.recipes.recipeCount")}
+          </label>
           <Select
             value={recipeCount}
             items={RECIPE_COUNTS.map((count) => ({
               value: String(count),
-              label: `${count} recettes`,
+              label: t("pages.recipes.recipeCountOption", { count }),
             }))}
             onValueChange={(value) => value && setRecipeCount(value)}
           >
@@ -52,7 +57,7 @@ export function GenerateRecipesForm({
             <SelectContent>
               {RECIPE_COUNTS.map((count) => (
                 <SelectItem key={count} value={String(count)}>
-                  {count} recettes
+                  {t("pages.recipes.recipeCountOption", { count })}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -67,11 +72,7 @@ export function GenerateRecipesForm({
               try {
                 await generateRecipesAction(Number(recipeCount));
               } catch (error) {
-                toast.error(
-                  error instanceof Error
-                    ? error.message
-                    : "Erreur lors de la génération",
-                );
+                toast.error(getErrorMessage(error, t, "GENERATION_ERROR"));
               }
             })
           }
@@ -81,7 +82,7 @@ export function GenerateRecipesForm({
           ) : (
             <Sparkles className="mr-2 size-4" />
           )}
-          Générer les recettes
+          {t("pages.recipes.generate")}
         </Button>
       </CardContent>
     </Card>

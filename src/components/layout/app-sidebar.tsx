@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChefHat } from "lucide-react";
+import { LocaleSwitcher } from "@/components/layout/locale-switcher";
+import { useTranslate } from "@/components/providers/locale-provider";
 import {
   Sidebar,
   SidebarContent,
@@ -14,11 +16,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { isNavActive, NAV_ITEMS } from "@/lib/nav-items";
+import { isNavActive, useNavItems } from "@/lib/i18n/navigation";
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const t = useTranslate();
+  const navItems = useNavItems();
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
@@ -34,19 +39,24 @@ export function AppSidebar() {
             <ChefHat className="size-4" strokeWidth={1.75} />
           </span>
           <span className="truncate text-sm font-medium tracking-tight group-data-[collapsible=icon]:hidden">
-            MealDeals
+            {t("nav.brand")}
           </span>
         </Link>
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup className="pt-2">
+        <div className="px-2 pt-3 pb-2 group-data-[collapsible=icon]:px-1">
+          <LocaleSwitcher />
+        </div>
+        <SidebarSeparator className="mx-2 mb-1 group-data-[collapsible=icon]:mx-1" />
+
+        <SidebarGroup className="pt-0">
           <SidebarGroupLabel className="h-auto px-2 pb-1 pt-0 text-[0.6rem] font-semibold uppercase tracking-[0.1em] text-muted-foreground/55">
-            Menu
+            {t("nav.menu")}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => {
+              {navItems.map((item) => {
                 const Icon = item.icon;
                 const active = isNavActive(pathname, item.href);
 

@@ -2,6 +2,8 @@
 
 import { useTransition } from "react";
 import { toast } from "sonner";
+import { useTranslate } from "@/components/providers/locale-provider";
+import { getErrorMessage } from "@/lib/errors";
 import { updatePostalCodeAction } from "@/server/actions/settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +11,7 @@ import { Label } from "@/components/ui/label";
 
 export function PostalCodeForm({ postalCode }: { postalCode: string }) {
   const [isPending, startTransition] = useTransition();
+  const t = useTranslate();
 
   return (
     <form
@@ -21,17 +24,15 @@ export function PostalCodeForm({ postalCode }: { postalCode: string }) {
         startTransition(async () => {
           try {
             await updatePostalCodeAction(value);
-            toast.success("Code postal mis à jour");
+            toast.success(t("success.POSTAL_CODE_UPDATED"));
           } catch (error) {
-            toast.error(
-              error instanceof Error ? error.message : "Erreur de mise à jour",
-            );
+            toast.error(getErrorMessage(error, t, "UPDATE_ERROR"));
           }
         });
       }}
     >
       <div className="space-y-2">
-        <Label htmlFor="postalCode">Code postal</Label>
+        <Label htmlFor="postalCode">{t("forms.postalCode")}</Label>
         <Input
           id="postalCode"
           name="postalCode"
@@ -41,7 +42,7 @@ export function PostalCodeForm({ postalCode }: { postalCode: string }) {
         />
       </div>
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Enregistrement..." : "Enregistrer"}
+        {isPending ? t("common.saving") : t("common.save")}
       </Button>
     </form>
   );

@@ -3,11 +3,14 @@
 import { usePathname } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { isNavActive, NAV_ITEMS } from "@/lib/nav-items";
+import { useTranslate } from "@/components/providers/locale-provider";
+import { isNavActive, useNavItems } from "@/lib/i18n/navigation";
 
 export function AppPageHeader() {
   const pathname = usePathname();
-  const current = NAV_ITEMS.find((item) => isNavActive(pathname, item.href));
+  const t = useTranslate();
+  const navItems = useNavItems();
+  const current = navItems.find((item) => isNavActive(pathname, item.href));
 
   return (
     <header className="flex min-h-11 shrink-0 flex-col border-b border-border/60 bg-background/90 backdrop-blur-sm">
@@ -16,7 +19,7 @@ export function AppPageHeader() {
         <Separator orientation="vertical" className="h-4 bg-border/80" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-[0.8125rem] font-medium text-foreground">
-            {current?.label ?? "MealDeals"}
+            {current?.label ?? t("nav.brand")}
           </p>
         </div>
       </div>

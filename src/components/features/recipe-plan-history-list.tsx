@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Heart, RotateCcw } from "lucide-react";
+import { useLocale, useTranslate } from "@/components/providers/locale-provider";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -9,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { formatLocalizedDate } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils";
 
 interface RecipePlanHistoryListProps {
@@ -31,12 +35,18 @@ export function RecipePlanHistoryList({
   plans,
   variant = "default",
 }: RecipePlanHistoryListProps) {
+  const t = useTranslate();
+  const { locale } = useLocale();
+
   if (plans.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        Aucun menu généré pour le moment.{" "}
-        <Link href="/recettes" className="text-primary underline-offset-4 hover:underline">
-          Générer votre premier menu
+        {t("pages.history.noPlans")}{" "}
+        <Link
+          href="/recettes"
+          className="text-primary underline-offset-4 hover:underline"
+        >
+          {t("common.generateFirstMenu")}
         </Link>
         .
       </p>
@@ -49,6 +59,7 @@ export function RecipePlanHistoryList({
         {plans.map((plan) => {
           const favoriteCount = plan.recipes.filter((r) => r.isFavorite).length;
           const regularCount = plan.recipes.filter((r) => r.makeRegularly).length;
+          const dateLabel = formatLocalizedDate(plan.createdAt, locale);
 
           return (
             <div
@@ -56,13 +67,7 @@ export function RecipePlanHistoryList({
               className="flex flex-col gap-2 rounded-lg border px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="min-w-0 space-y-1">
-                <p className="text-sm font-medium">
-                  {plan.createdAt.toLocaleDateString("fr-CA", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
+                <p className="text-sm font-medium">{dateLabel}</p>
                 <p className="truncate text-xs text-muted-foreground">
                   {plan.recipes
                     .slice(0, 3)
@@ -96,7 +101,7 @@ export function RecipePlanHistoryList({
                   "shrink-0",
                 )}
               >
-                Consulter
+                {t("common.consult")}
                 <ArrowRight className="ml-1 size-3" />
               </Link>
             </div>
@@ -111,6 +116,7 @@ export function RecipePlanHistoryList({
       {plans.map((plan) => {
         const favoriteCount = plan.recipes.filter((r) => r.isFavorite).length;
         const regularCount = plan.recipes.filter((r) => r.makeRegularly).length;
+        const dateLabel = formatLocalizedDate(plan.createdAt, locale);
 
         return (
           <Card key={plan.id}>
@@ -118,22 +124,19 @@ export function RecipePlanHistoryList({
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <CardTitle className="text-base">
-                    Menu du{" "}
-                    {plan.createdAt.toLocaleDateString("fr-CA", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
+                    {t("pages.history.menuOf", { date: dateLabel })}
                   </CardTitle>
                   <CardDescription>
-                    {plan._count.recipes} recettes générées
+                    {t("pages.history.recipesGenerated", {
+                      count: plan._count.recipes,
+                    })}
                   </CardDescription>
                 </div>
                 <Link
                   href={`/resultats/${plan.id}`}
                   className={cn(buttonVariants({ size: "sm" }))}
                 >
-                  Consulter
+                  {t("common.consult")}
                   <ArrowRight className="ml-1.5 size-3.5" />
                 </Link>
               </div>
@@ -143,13 +146,17 @@ export function RecipePlanHistoryList({
                 {favoriteCount > 0 ? (
                   <Badge variant="outline">
                     <Heart className="mr-1 size-3" />
-                    {favoriteCount} favori{favoriteCount > 1 ? "s" : ""}
+                    {t("pages.history.favoriteCount", {
+                      count: favoriteCount,
+                    })}
                   </Badge>
                 ) : null}
                 {regularCount > 0 ? (
                   <Badge variant="secondary">
                     <RotateCcw className="mr-1 size-3" />
-                    {regularCount} régulier{regularCount > 1 ? "s" : ""}
+                    {t("pages.history.regularCount", {
+                      count: regularCount,
+                    })}
                   </Badge>
                 ) : null}
               </div>
@@ -158,7 +165,12 @@ export function RecipePlanHistoryList({
                   <li key={recipe.id}>· {recipe.name}</li>
                 ))}
                 {plan.recipes.length > 4 ? (
-                  <li>· … et {plan.recipes.length - 4} autre(s)</li>
+                  <li>
+                    ·{" "}
+                    {t("pages.history.andMore", {
+                      count: plan.recipes.length - 4,
+                    })}
+                  </li>
                 ) : null}
               </ul>
             </CardContent>

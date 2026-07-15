@@ -3,11 +3,14 @@
 import { useTransition } from "react";
 import { Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslate } from "@/components/providers/locale-provider";
+import { getErrorMessage } from "@/lib/errors";
 import { syncPromotionsAction } from "@/server/actions/settings";
 import { Button } from "@/components/ui/button";
 
 export function SyncPromotionsButton() {
   const [isPending, startTransition] = useTransition();
+  const t = useTranslate();
 
   return (
     <Button
@@ -25,14 +28,14 @@ export function SyncPromotionsButton() {
             );
 
             toast.success(
-              `${successCount}/${results.length} épiceries synchronisées (${totalItems} promotions)`,
+              t("success.SYNC_SUCCESS", {
+                successCount,
+                total: results.length,
+                totalItems,
+              }),
             );
           } catch (error) {
-            toast.error(
-              error instanceof Error
-                ? error.message
-                : "Erreur lors de la synchronisation",
-            );
+            toast.error(getErrorMessage(error, t, "SYNC_ERROR"));
           }
         })
       }
@@ -42,7 +45,7 @@ export function SyncPromotionsButton() {
       ) : (
         <RefreshCw className="mr-2 size-4" />
       )}
-      Synchroniser les circulaires
+      {t("common.syncFlyers")}
     </Button>
   );
 }

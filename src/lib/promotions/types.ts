@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n/types";
+
 export type PromotionProviderId = "flipp";
 
 export interface RawPromotion {
@@ -22,6 +24,7 @@ export interface PromotionProvider {
     merchant: string;
     postalCode: string;
     config?: Record<string, unknown>;
+    locale?: Locale;
   }): Promise<RawPromotion[]>;
 }
 

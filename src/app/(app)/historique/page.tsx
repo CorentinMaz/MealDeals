@@ -2,6 +2,7 @@ import { PageShell } from "@/components/layout/page-shell";
 import { RecipePlanHistoryList } from "@/components/features/recipe-plan-history-list";
 import { SavedRecipeCard } from "@/components/features/saved-recipe-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getServerTranslator } from "@/lib/i18n/server";
 import {
   getRecipePlansHistory,
   getSavedRecipes,
@@ -14,6 +15,7 @@ export default async function HistoriquePage() {
     getRecipePlansHistory(),
     getSavedRecipes(),
   ]);
+  const t = await getServerTranslator();
 
   const favorites = savedRecipes.filter((recipe) => recipe.isFavorite);
   const regulars = savedRecipes.filter((recipe) => recipe.makeRegularly);
@@ -22,24 +24,24 @@ export default async function HistoriquePage() {
     <PageShell width="lg">
       <div className="space-y-6">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">Historique</h1>
+          <h1 className="text-xl font-semibold tracking-tight">
+            {t("pages.history.title")}
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Consultez vos menus passés, marquez vos recettes favorites et
-            indiquez celles à refaire régulièrement — l&apos;IA en tiendra
-            compte lors des prochaines générations.
+            {t("pages.history.subtitle")}
           </p>
         </div>
 
         <Tabs defaultValue="menus">
           <TabsList>
             <TabsTrigger value="menus">
-              Menus ({plans.length})
+              {t("pages.history.tabMenus", { count: plans.length })}
             </TabsTrigger>
             <TabsTrigger value="favorites">
-              Favoris ({favorites.length})
+              {t("pages.history.tabFavorites", { count: favorites.length })}
             </TabsTrigger>
             <TabsTrigger value="regulars">
-              À refaire ({regulars.length})
+              {t("pages.history.tabRegulars", { count: regulars.length })}
             </TabsTrigger>
           </TabsList>
 
@@ -54,8 +56,7 @@ export default async function HistoriquePage() {
               ))
             ) : (
               <p className="text-sm text-muted-foreground">
-                Aucune recette favorite. Marquez une recette avec le bouton
-                « Favori » sur un menu généré.
+                {t("pages.history.noFavorites")}
               </p>
             )}
           </TabsContent>
@@ -67,9 +68,7 @@ export default async function HistoriquePage() {
               ))
             ) : (
               <p className="text-sm text-muted-foreground">
-                Aucune recette marquée à refaire. Utilisez le bouton « À
-                refaire » pour indiquer à l&apos;IA les plats que vous aimez
-                refaire souvent.
+                {t("pages.history.noRegulars")}
               </p>
             )}
           </TabsContent>

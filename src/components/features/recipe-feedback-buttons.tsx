@@ -3,6 +3,8 @@
 import { useTransition } from "react";
 import { Heart, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslate } from "@/components/providers/locale-provider";
+import { getErrorMessage } from "@/lib/errors";
 import {
   toggleRecipeFavoriteAction,
   toggleRecipeMakeRegularlyAction,
@@ -24,6 +26,7 @@ export function RecipeFeedbackButtons({
   size = "default",
 }: RecipeFeedbackButtonsProps) {
   const [isPending, startTransition] = useTransition();
+  const t = useTranslate();
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -38,13 +41,11 @@ export function RecipeFeedbackButtons({
               await toggleRecipeFavoriteAction(recipeId, !isFavorite);
               toast.success(
                 !isFavorite
-                  ? "Recette ajoutée aux favoris"
-                  : "Recette retirée des favoris",
+                  ? t("success.RECIPE_FAVORITE_ADDED")
+                  : t("success.RECIPE_FAVORITE_REMOVED"),
               );
             } catch (error) {
-              toast.error(
-                error instanceof Error ? error.message : "Erreur de sauvegarde",
-              );
+              toast.error(getErrorMessage(error, t, "SAVE_ERROR"));
             }
           })
         }
@@ -52,7 +53,7 @@ export function RecipeFeedbackButtons({
         <Heart
           className={cn("mr-1.5 size-3.5", isFavorite && "fill-current")}
         />
-        Favori
+        {t("common.favorite")}
       </Button>
 
       <Button
@@ -69,19 +70,17 @@ export function RecipeFeedbackButtons({
               );
               toast.success(
                 !makeRegularly
-                  ? "Recette marquée à refaire régulièrement — l'IA en tiendra compte"
-                  : "Recette retirée des plats réguliers",
+                  ? t("success.RECIPE_REGULAR_ADDED")
+                  : t("success.RECIPE_REGULAR_REMOVED"),
               );
             } catch (error) {
-              toast.error(
-                error instanceof Error ? error.message : "Erreur de sauvegarde",
-              );
+              toast.error(getErrorMessage(error, t, "SAVE_ERROR"));
             }
           })
         }
       >
         <RotateCcw className="mr-1.5 size-3.5" />
-        À refaire
+        {t("common.makeAgain")}
       </Button>
     </div>
   );

@@ -20,6 +20,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
+import { useTranslate } from "@/components/providers/locale-provider";
 import { cn } from "@/lib/utils";
 
 export type PromotionListItem = {
@@ -63,6 +64,7 @@ export function PromotionsBrowser({
   stores,
   promotions,
 }: PromotionsBrowserProps) {
+  const t = useTranslate();
   const [query, setQuery] = useState("");
   const [selectedStoreIds, setSelectedStoreIds] = useState<Set<string>>(
     () => new Set(stores.map((store) => store.id)),
@@ -144,9 +146,9 @@ export function PromotionsBrowser({
             <EmptyMedia variant="icon">
               <Tag className="size-4" strokeWidth={1.75} />
             </EmptyMedia>
-            <EmptyTitle>Aucune épicerie sélectionnée</EmptyTitle>
+            <EmptyTitle>{t("pages.promotions.noStoreSelected")}</EmptyTitle>
             <EmptyDescription>
-              Sélectionnez au moins une épicerie pour afficher les promotions.
+              {t("pages.promotions.selectStoreHint")}
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -171,9 +173,9 @@ export function PromotionsBrowser({
             <EmptyMedia variant="icon">
               <Search className="size-4" strokeWidth={1.75} />
             </EmptyMedia>
-            <EmptyTitle>Aucun résultat</EmptyTitle>
+            <EmptyTitle>{t("pages.promotions.noResults")}</EmptyTitle>
             <EmptyDescription>
-              Aucune promotion ne correspond à votre recherche ou à vos filtres.
+              {t("pages.promotions.noResultsHint")}
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -195,9 +197,9 @@ export function PromotionsBrowser({
 
       {hasActiveFilters ? (
         <p className="text-sm text-muted-foreground">
-          {filteredPromotions.length} promotion
-          {filteredPromotions.length > 1 ? "s" : ""} trouvée
-          {filteredPromotions.length > 1 ? "s" : ""}
+          {t("pages.promotions.foundCount", {
+            count: filteredPromotions.length,
+          })}
         </p>
       ) : null}
 
@@ -221,6 +223,8 @@ function SearchBar({
   query: string;
   onQueryChange: (value: string) => void;
 }) {
+  const t = useTranslate();
+
   return (
     <div className="relative">
       <Search
@@ -231,9 +235,9 @@ function SearchBar({
         type="search"
         value={query}
         onChange={(event) => onQueryChange(event.target.value)}
-        placeholder="Rechercher un produit, une marque ou une épicerie…"
+        placeholder={t("pages.promotions.searchPlaceholder")}
         className="pr-9 pl-9"
-        aria-label="Rechercher dans les promotions"
+        aria-label={t("pages.promotions.searchAria")}
       />
       {query ? (
         <Button
@@ -242,7 +246,7 @@ function SearchBar({
           size="icon-xs"
           className="absolute top-1/2 right-1.5 -translate-y-1/2"
           onClick={() => onQueryChange("")}
-          aria-label="Effacer la recherche"
+          aria-label={t("pages.promotions.clearSearchAria")}
         >
           <X />
         </Button>
@@ -266,24 +270,29 @@ function StoreFilterPanel({
   onSelectAll: () => void;
   onDeselectAll: () => void;
 }) {
+  const t = useTranslate();
   const selectedCount = selectedStoreIds.size;
 
   return (
     <PagePanel className="overflow-hidden">
       <div className="flex items-center justify-between gap-2 border-b border-border/40 px-4 py-3">
         <div>
-          <p className="text-sm font-medium text-foreground">Filtrer par épicerie</p>
+          <p className="text-sm font-medium text-foreground">
+            {t("pages.promotions.filterByStore")}
+          </p>
           <p className="text-xs text-muted-foreground">
-            {selectedCount} sur {stores.length} sélectionnée
-            {selectedCount > 1 ? "s" : ""}
+            {t("pages.promotions.selectedOf", {
+              selected: selectedCount,
+              total: stores.length,
+            })}
           </p>
         </div>
         <div className="flex items-center gap-1">
           <Button type="button" variant="ghost" size="xs" onClick={onSelectAll}>
-            Tout
+            {t("common.all")}
           </Button>
           <Button type="button" variant="ghost" size="xs" onClick={onDeselectAll}>
-            Aucun
+            {t("common.none")}
           </Button>
         </div>
       </div>
@@ -321,6 +330,7 @@ function StorePromotionsSection({
   storeName: string;
   items: PromotionListItem[];
 }) {
+  const t = useTranslate();
   const [open, setOpen] = useState(true);
 
   return (
@@ -329,7 +339,9 @@ function StorePromotionsSection({
         <CollapsibleTrigger className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-muted/40">
           <div className="flex items-center gap-3">
             <h2 className="text-base font-medium">{storeName}</h2>
-            <Badge variant="secondary">{items.length} produits</Badge>
+            <Badge variant="secondary">
+              {items.length} {t("common.products")}
+            </Badge>
           </div>
           <ChevronDown
             className={cn(
@@ -342,7 +354,7 @@ function StorePromotionsSection({
         <CollapsibleContent className="border-t border-border/60">
           {items.length === 0 ? (
             <p className="px-4 py-3 text-sm text-muted-foreground">
-              Aucune promotion pour cette épicerie.
+              {t("pages.promotions.noStorePromotions")}
             </p>
           ) : (
             <div className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

@@ -3,6 +3,9 @@ import {
   isLikelyFoodItem,
   parsePrice,
 } from "@/lib/promotions/food-filter";
+import { createAppError } from "@/lib/errors";
+import { localeToFlippLocale } from "@/lib/i18n/locale";
+import type { Locale } from "@/lib/i18n/types";
 import type {
   FlippFlyer,
   FlippFlyerItem,
@@ -80,19 +83,22 @@ export class FlippPromotionProvider implements PromotionProvider {
   async fetchPromotions(input: {
     merchant: string;
     postalCode: string;
+    locale?: Locale;
   }): Promise<RawPromotion[]> {
     const sid = generateSessionId();
     const postalCode = input.postalCode.replace(/\s/g, "").toUpperCase();
+    const flippLocale = localeToFlippLocale(input.locale ?? "fr");
 
     const flyersResponse = await fetch(
-      `${FLIPP_DATA_URL}?locale=fr&postal_code=${postalCode}&sid=${sid}`,
+      `${FLIPP_DATA_URL}?locale=${flippLocale}&postal_code=${postalCode}&sid=${sid}`,
       { next: { revalidate: 0 } },
     );
 
     if (!flyersResponse.ok) {
-      throw new Error(
-        `Échec de la récupération des circulaires Flipp (${flyersResponse.status}) pour ${input.merchant}`,
-      );
+      throw createAppError("FLIPP_FLYERS_FETCH_FAILED", {
+        status: flyersResponse.status,
+        merchant: input.merchant,
+      });
     }
 
     const flyersData = (await flyersResponse.json()) as {
@@ -105,14 +111,15 @@ export class FlippPromotionProvider implements PromotionProvider {
     }
 
     const itemsResponse = await fetch(
-      `${FLIPP_ITEMS_URL}/${flyer.id}/flyer_items?locale=fr&sid=${sid}`,
+      `${FLIPP_ITEMS_URL}/${flyer.id}/flyer_items?locale=${flippLocale}&sid=${sid}`,
       { next: { revalidate: 0 } },
     );
 
     if (!itemsResponse.ok) {
-      throw new Error(
-        `Échec de la récupération des produits Flipp (${itemsResponse.status}) pour la circulaire ${flyer.id}`,
-      );
+      throw createAppError("FLIPP_ITEMS_FETCH_FAILED", {
+        status: itemsResponse.status,
+        flyerId: flyer.id,
+      });
     }
 
     const items = (await itemsResponse.json()) as FlippFlyerItem[];

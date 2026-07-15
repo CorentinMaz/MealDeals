@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
+import { getServerLocale } from "@/lib/i18n/server";
 import "./globals.css";
 
 const inter = Inter({
@@ -20,14 +21,16 @@ export const metadata: Metadata = {
     "Générez des recettes hebdomadaires basées sur les circulaires des épiceries québécoises.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getServerLocale();
+
   return (
     <html
-      lang="fr"
+      lang={locale}
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body

@@ -2,6 +2,8 @@
 
 import { useTransition } from "react";
 import { toast } from "sonner";
+import { useTranslate } from "@/components/providers/locale-provider";
+import { getErrorMessage } from "@/lib/errors";
 import { updatePreferencesAction } from "@/server/actions/settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +28,7 @@ interface PreferencesFormProps {
 
 export function PreferencesForm({ preferences }: PreferencesFormProps) {
   const [isPending, startTransition] = useTransition();
+  const t = useTranslate();
 
   return (
     <form
@@ -44,57 +47,55 @@ export function PreferencesForm({ preferences }: PreferencesFormProps) {
               maxPrepMinutes: Number(formData.get("maxPrepMinutes") ?? 60),
               weeklyBudget: Number(formData.get("weeklyBudget") ?? 150),
             });
-            toast.success("Préférences enregistrées");
+            toast.success(t("success.PREFERENCES_SAVED"));
           } catch (error) {
-            toast.error(
-              error instanceof Error ? error.message : "Erreur de sauvegarde",
-            );
+            toast.error(getErrorMessage(error, t, "SAVE_ERROR"));
           }
         });
       }}
     >
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="allergies">Allergies</Label>
+          <Label htmlFor="allergies">{t("forms.allergies")}</Label>
           <Textarea
             id="allergies"
             name="allergies"
             defaultValue={fromList(preferences.allergies)}
-            placeholder="arachides, gluten, lactose"
+            placeholder={t("forms.allergiesPlaceholder")}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="diets">Régimes alimentaires</Label>
+          <Label htmlFor="diets">{t("forms.diets")}</Label>
           <Textarea
             id="diets"
             name="diets"
             defaultValue={fromList(preferences.diets)}
-            placeholder="végétarien, sans gluten"
+            placeholder={t("forms.dietsPlaceholder")}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="likedFoods">Aliments aimés</Label>
+          <Label htmlFor="likedFoods">{t("forms.likedFoods")}</Label>
           <Textarea
             id="likedFoods"
             name="likedFoods"
             defaultValue={fromList(preferences.likedFoods)}
-            placeholder="poulet, brocoli, pâtes"
+            placeholder={t("forms.likedFoodsPlaceholder")}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="dislikedFoods">Aliments refusés</Label>
+          <Label htmlFor="dislikedFoods">{t("forms.dislikedFoods")}</Label>
           <Textarea
             id="dislikedFoods"
             name="dislikedFoods"
             defaultValue={fromList(preferences.dislikedFoods)}
-            placeholder="foie, anchois"
+            placeholder={t("forms.dislikedFoodsPlaceholder")}
           />
         </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="maxPrepMinutes">Temps maximal de préparation (min)</Label>
+          <Label htmlFor="maxPrepMinutes">{t("forms.maxPrepMinutes")}</Label>
           <Input
             id="maxPrepMinutes"
             name="maxPrepMinutes"
@@ -107,7 +108,7 @@ export function PreferencesForm({ preferences }: PreferencesFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="weeklyBudget">Budget hebdomadaire ($)</Label>
+          <Label htmlFor="weeklyBudget">{t("forms.weeklyBudget")}</Label>
           <Input
             id="weeklyBudget"
             name="weeklyBudget"
@@ -120,7 +121,7 @@ export function PreferencesForm({ preferences }: PreferencesFormProps) {
       </div>
 
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Enregistrement..." : "Enregistrer les préférences"}
+        {isPending ? t("common.saving") : t("common.savePreferences")}
       </Button>
     </form>
   );

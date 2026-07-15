@@ -14,16 +14,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslate } from "@/components/providers/locale-provider";
+import { getErrorMessage } from "@/lib/errors";
 import type { SerializedUserPreferences } from "@/lib/preferences/serialize";
-import { CalorieCalculator } from "@/components/features/calorie-calculator";
 import { estimateDailyCalories } from "@/lib/nutrition/calorie-target";
+import { CalorieCalculator } from "@/components/features/calorie-calculator";
 import {
-  FITNESS_GOAL_DESCRIPTIONS,
-  FITNESS_GOAL_LABELS,
   FITNESS_GOALS,
   isFitnessGoal,
   isNutritionMode,
-  NUTRITION_MODE_LABELS,
   NUTRITION_MODES,
   nutritionProfileFromPreferences,
   type FitnessGoal,
@@ -36,6 +35,7 @@ interface NutritionGoalsFormProps {
 
 export function NutritionGoalsForm({ preferences }: NutritionGoalsFormProps) {
   const [isPending, startTransition] = useTransition();
+  const t = useTranslate();
 
   const [nutritionMode, setNutritionMode] = useState<NutritionMode>(
     isNutritionMode(preferences.nutritionMode)
@@ -104,7 +104,7 @@ export function NutritionGoalsForm({ preferences }: NutritionGoalsFormProps) {
         event.preventDefault();
 
         if (isGuided && !fitnessGoal) {
-          toast.error("Choisissez un objectif nutritionnel.");
+          toast.error(t("errors.SELECT_FITNESS_GOAL"));
           return;
         }
 
@@ -113,7 +113,7 @@ export function NutritionGoalsForm({ preferences }: NutritionGoalsFormProps) {
           useManualCalories &&
           (!dailyCalorieTarget || Number(dailyCalorieTarget) < 1200)
         ) {
-          toast.error("L'objectif calorique doit être d'au moins 1200 kcal.");
+          toast.error(t("errors.MIN_CALORIE_TARGET"));
           return;
         }
 
@@ -137,22 +137,20 @@ export function NutritionGoalsForm({ preferences }: NutritionGoalsFormProps) {
                   ? Number(runningSessionsPerWeek) || 0
                   : null,
             });
-            toast.success("Objectifs nutritionnels enregistrés");
+            toast.success(t("success.NUTRITION_GOALS_SAVED"));
           } catch (error) {
-            toast.error(
-              error instanceof Error ? error.message : "Erreur de sauvegarde",
-            );
+            toast.error(getErrorMessage(error, t, "SAVE_ERROR"));
           }
         });
       }}
     >
       <div className="space-y-2">
-        <Label>Que voulez-vous obtenir ?</Label>
+        <Label>{t("forms.nutritionWhatDoYouWant")}</Label>
         <Select
           value={nutritionMode}
           items={NUTRITION_MODES.map((mode) => ({
             value: mode,
-            label: NUTRITION_MODE_LABELS[mode],
+            label: t(`nutrition.modes.${mode}`),
           }))}
           onValueChange={(value) => {
             if (value && isNutritionMode(value)) {
@@ -166,27 +164,27 @@ export function NutritionGoalsForm({ preferences }: NutritionGoalsFormProps) {
           <SelectContent>
             {NUTRITION_MODES.map((mode) => (
               <SelectItem key={mode} value={mode}>
-                {NUTRITION_MODE_LABELS[mode]}
+                {t(`nutrition.modes.${mode}`)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         <p className="text-sm text-muted-foreground">
           {nutritionMode === "recipes_only"
-            ? "Génération de recettes basées sur les promotions, sans contrainte calorique."
-            : "Les recettes seront adaptées à votre objectif, votre activité physique et vos calories cibles."}
+            ? t("forms.nutritionRecipesOnlyHint")
+            : t("forms.nutritionGuidedHint")}
         </p>
       </div>
 
       {isGuided ? (
         <>
           <div className="space-y-2">
-            <Label>Objectif principal</Label>
+            <Label>{t("forms.nutritionMainGoal")}</Label>
             <Select
               value={fitnessGoal}
               items={FITNESS_GOALS.map((goal) => ({
                 value: goal,
-                label: FITNESS_GOAL_LABELS[goal],
+                label: t(`nutrition.goals.${goal}`),
               }))}
               onValueChange={(value) => {
                 if (value && isFitnessGoal(value)) {
@@ -195,28 +193,29 @@ export function NutritionGoalsForm({ preferences }: NutritionGoalsFormProps) {
               }}
             >
               <SelectTrigger className="w-full max-w-md">
-                <SelectValue placeholder="Choisir un objectif" />
+                <SelectValue placeholder={t("forms.nutritionChooseGoal")} />
               </SelectTrigger>
               <SelectContent>
                 {FITNESS_GOALS.map((goal) => (
                   <SelectItem key={goal} value={goal}>
-                    {FITNESS_GOAL_LABELS[goal]}
+                    {t(`nutrition.goals.${goal}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {fitnessGoal ? (
               <p className="text-sm text-muted-foreground">
-                {FITNESS_GOAL_DESCRIPTIONS[fitnessGoal]}
+                {t(`nutrition.goalDescriptions.${fitnessGoal}`)}
               </p>
             ) : null}
           </div>
 
           <div className="space-y-4 rounded-lg border p-4">
-            <h4 className="text-sm font-medium">Activité physique</h4>
+            <h4 className="text-sm font-medium">
+              {t("forms.nutritionPhysicalActivity")}
+            </h4>
             <p className="text-sm text-muted-foreground">
-              Indiquez vos activités pour ajuster les calories et les macros
-              (ex. prise de masse + musculation + course).
+              {t("forms.nutritionActivityHint")}
             </p>
 
             <div className="space-y-3">
@@ -227,7 +226,9 @@ export function NutritionGoalsForm({ preferences }: NutritionGoalsFormProps) {
                   className="mt-0.5"
                 />
                 <span className="space-y-2">
-                  <span className="block text-sm font-medium">Musculation</span>
+                  <span className="block text-sm font-medium">
+                    {t("forms.nutritionGym")}
+                  </span>
                   {activityGym ? (
                     <div className="flex items-center gap-2">
                       <Input
@@ -241,7 +242,7 @@ export function NutritionGoalsForm({ preferences }: NutritionGoalsFormProps) {
                         className="w-20"
                       />
                       <span className="text-sm text-muted-foreground">
-                        séances / semaine
+                        {t("common.sessionsPerWeek")}
                       </span>
                     </div>
                   ) : null}
@@ -258,7 +259,7 @@ export function NutritionGoalsForm({ preferences }: NutritionGoalsFormProps) {
                 />
                 <span className="space-y-2">
                   <span className="block text-sm font-medium">
-                    Course à pied
+                    {t("forms.nutritionRunning")}
                   </span>
                   {activityRunning ? (
                     <div className="flex items-center gap-2">
@@ -273,7 +274,7 @@ export function NutritionGoalsForm({ preferences }: NutritionGoalsFormProps) {
                         className="w-20"
                       />
                       <span className="text-sm text-muted-foreground">
-                        séances / semaine
+                        {t("common.sessionsPerWeek")}
                       </span>
                     </div>
                   ) : null}
@@ -299,7 +300,9 @@ export function NutritionGoalsForm({ preferences }: NutritionGoalsFormProps) {
           />
 
           <div className="space-y-4 rounded-lg border p-4">
-            <h4 className="text-sm font-medium">Calories journalières</h4>
+            <h4 className="text-sm font-medium">
+              {t("forms.nutritionDailyCalories")}
+            </h4>
 
             <label className="flex items-center gap-3">
               <Checkbox
@@ -309,7 +312,7 @@ export function NutritionGoalsForm({ preferences }: NutritionGoalsFormProps) {
                 }
               />
               <span className="text-sm">
-                Définir un objectif calorique manuel
+                {t("forms.nutritionManualCalories")}
               </span>
             </label>
 
@@ -324,16 +327,20 @@ export function NutritionGoalsForm({ preferences }: NutritionGoalsFormProps) {
                   onChange={(event) =>
                     setDailyCalorieTarget(event.target.value)
                   }
-                  placeholder="ex. 3000"
+                  placeholder={t("forms.nutritionCaloriePlaceholder")}
                   className="w-32"
                 />
-                <span className="text-sm text-muted-foreground">kcal / jour</span>
+                <span className="text-sm text-muted-foreground">
+                  {t("common.kcalPerDay")}
+                </span>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
                 {estimatedCalories
-                  ? `Estimation automatique : ~${estimatedCalories.dailyCalories} kcal/jour selon votre objectif et votre activité.`
-                  : "Choisissez un objectif pour voir l'estimation calorique."}
+                  ? t("forms.nutritionAutoEstimate", {
+                      calories: estimatedCalories.dailyCalories,
+                    })
+                  : t("forms.nutritionChooseGoalForEstimate")}
               </p>
             )}
           </div>
@@ -341,7 +348,7 @@ export function NutritionGoalsForm({ preferences }: NutritionGoalsFormProps) {
       ) : null}
 
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Enregistrement..." : "Enregistrer les objectifs"}
+        {isPending ? t("common.saving") : t("common.saveGoals")}
       </Button>
     </form>
   );
@@ -352,6 +359,7 @@ export function NutritionGoalsSummary({
 }: {
   preferences: SerializedUserPreferences;
 }) {
+  const t = useTranslate();
   const profile = nutritionProfileFromPreferences(preferences);
   if (profile.nutritionMode !== "guided" || !profile.fitnessGoal) {
     return null;
@@ -362,25 +370,35 @@ export function NutritionGoalsSummary({
     return null;
   }
 
-  const activities: string[] = [];
+  const activityParts: string[] = [];
   if (profile.activityGym) {
-    activities.push(
-      `musculation (${profile.gymSessionsPerWeek ?? 0}×/sem.)`,
+    activityParts.push(
+      t("forms.nutritionActivityGym", {
+        count: profile.gymSessionsPerWeek ?? 0,
+      }),
     );
   }
   if (profile.activityRunning) {
-    activities.push(
-      `course (${profile.runningSessionsPerWeek ?? 0}×/sem.)`,
+    activityParts.push(
+      t("forms.nutritionActivityRunning", {
+        count: profile.runningSessionsPerWeek ?? 0,
+      }),
     );
   }
 
+  const activities =
+    activityParts.length > 0 ? ` · ${activityParts.join(", ")}` : "";
+
   return (
     <p className="text-sm text-muted-foreground">
-      Profil actif : {FITNESS_GOAL_LABELS[profile.fitnessGoal]}
-      {activities.length > 0 ? ` · ${activities.join(", ")}` : ""}
-      {" · "}
-      ~{estimate.dailyCalories} kcal/jour
-      {estimate.isEstimated ? " (estimé)" : " (manuel)"}
+      {t("forms.nutritionActiveProfile", {
+        goal: t(`nutrition.goals.${profile.fitnessGoal}`),
+        activities,
+        calories: estimate.dailyCalories,
+        source: estimate.isEstimated
+          ? t("common.estimated")
+          : t("common.manual"),
+      })}
     </p>
   );
 }

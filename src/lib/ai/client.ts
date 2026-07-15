@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { z } from "zod";
+import { createAppError } from "@/lib/errors";
 
 export type AiProvider = "anthropic" | "openai";
 
@@ -64,10 +65,10 @@ function resolveApiKey(provider: AiProvider, config: AiClientConfig): string {
       : process.env.OPENAI_API_KEY);
 
   if (!apiKey) {
-    throw new Error(
+    throw createAppError(
       provider === "anthropic"
-        ? "La clé ANTHROPIC_API_KEY est requise pour générer des recettes."
-        : "La clé OPENAI_API_KEY est requise pour générer des recettes.",
+        ? "ANTHROPIC_API_KEY_REQUIRED"
+        : "OPENAI_API_KEY_REQUIRED",
     );
   }
 
@@ -94,9 +95,7 @@ function parseRecipeGeneration(content: string): RecipeGenerationResult {
     const parsed = JSON.parse(extractJsonPayload(content)) as unknown;
     return recipeGenerationSchema.parse(parsed);
   } catch {
-    throw new Error(
-      "Réponse IA invalide — format inattendu. Veuillez réessayer.",
-    );
+    throw createAppError("AI_INVALID_RESPONSE");
   }
 }
 
@@ -127,7 +126,7 @@ export function createAiClient(config: AiClientConfig = {}) {
           (block) => block.type === "text",
         );
         if (!textBlock || textBlock.type !== "text") {
-          throw new Error("Réponse IA vide — aucun contenu reçu.");
+          throw createAppError("AI_EMPTY_RESPONSE");
         }
 
         return parseRecipeGeneration(textBlock.text);
@@ -146,13 +145,13 @@ export function createAiClient(config: AiClientConfig = {}) {
 
         const content = response.choices[0]?.message?.content;
         if (!content) {
-          throw new Error("Réponse IA vide — aucun contenu reçu.");
+          throw createAppError("AI_EMPTY_RESPONSE");
         }
 
         return parseRecipeGeneration(content);
       }
 
-      throw new Error(`Fournisseur IA non pris en charge : ${provider}`);
+      throw createAppError("UNSUPPORTED_AI_PROVIDER", { provider });
     },
   };
 }
