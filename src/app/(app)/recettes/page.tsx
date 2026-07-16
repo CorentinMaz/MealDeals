@@ -1,5 +1,5 @@
 import { GenerateRecipesForm } from "@/components/features/generate-recipes-form";
-import { NutritionGoalsSummary } from "@/components/features/nutrition-goals-form";
+import { NutritionGoalsSummary } from "@/components/features/nutrition-goals-summary";
 import { PageShell } from "@/components/layout/page-shell";
 import { getServerTranslator } from "@/lib/i18n/server";
 import { getDashboardData, getSettingsData } from "@/server/queries";

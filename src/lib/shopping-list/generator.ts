@@ -1,10 +1,15 @@
 import type { GeneratedRecipe } from "@/lib/ai/client";
+import { findPromotionForIngredient } from "@/lib/promotions/match-ingredient";
+import type { PromotionSnapshot } from "@/lib/promotions/types";
+import { buildStoreLookup, resolveStoreRef } from "@/lib/stores/resolve";
 
 export interface ShoppingListItem {
   name: string;
   quantity: string;
   category: string;
   recommendedStore: string;
+  storeSlug?: string;
+  promotionId?: string;
   estimatedPrice: number;
   isOnSale: boolean;
 }
@@ -33,7 +38,10 @@ function categorizeIngredient(name: string): string {
   return "Autres";
 }
 
-export function buildShoppingList(recipes: GeneratedRecipe[]): ShoppingListCategory[] {
+export function buildShoppingList(
+  recipes: GeneratedRecipe[],
+  storeNames: Record<string, string> = {},
+): ShoppingListCategory[] {
   const aggregated = new Map<string, ShoppingListItem>();
 
   for (const recipe of recipes) {
@@ -45,14 +53,21 @@ export function buildShoppingList(recipes: GeneratedRecipe[]): ShoppingListCateg
         existing.quantity = `${existing.quantity} + ${ingredient.quantity}`;
         existing.estimatedPrice += ingredient.estimatedPrice ?? 0;
         existing.isOnSale = existing.isOnSale || ingredient.isOnSale;
+        existing.promotionId = existing.promotionId ?? ingredient.promotionId;
         continue;
       }
 
+      const storeSlug = ingredient.storeSlug;
       aggregated.set(key, {
         name: ingredient.name,
         quantity: ingredient.quantity,
         category: categorizeIngredient(ingredient.name),
-        recommendedStore: ingredient.storeSlug ?? "Épicerie locale",
+        recommendedStore:
+          (storeSlug && storeNames[storeSlug]) ||
+          storeSlug ||
+          "Épicerie locale",
+        storeSlug,
+        promotionId: ingredient.promotionId,
         estimatedPrice: ingredient.estimatedPrice ?? 0,
         isOnSale: ingredient.isOnSale,
       });
@@ -65,6 +80,59 @@ export function buildShoppingList(recipes: GeneratedRecipe[]): ShoppingListCateg
     const items = grouped.get(item.category) ?? [];
     items.push(item);
     grouped.set(item.category, items);
+  }
+
+  return Array.from(grouped.entries())
+    .map(([category, items]) => ({
+      category,
+      items: items.sort((a, b) => a.name.localeCompare(b.name, "fr")),
+    }))
+    .sort((a, b) => a.category.localeCompare(b.category, "fr"));
+}
+
+function getItemStoreName(
+  item: ShoppingListItem,
+  promotions: PromotionSnapshot[],
+  storeLookup: ReturnType<typeof buildStoreLookup>,
+): string {
+  if (item.isOnSale) {
+    const promotion = findPromotionForIngredient(
+      {
+        name: item.name,
+        quantity: item.quantity,
+        isOnSale: item.isOnSale,
+        storeSlug: item.storeSlug ?? item.recommendedStore,
+        promotionId: item.promotionId,
+        estimatedPrice: item.estimatedPrice,
+      },
+      promotions,
+    );
+    if (promotion) {
+      return promotion.store.name;
+    }
+  }
+
+  const store = resolveStoreRef(
+    item.storeSlug ?? item.recommendedStore,
+    storeLookup,
+  );
+  return store?.name ?? item.recommendedStore ?? "Épicerie locale";
+}
+
+export function groupShoppingListByStore(
+  categories: ShoppingListCategory[],
+  promotions: PromotionSnapshot[],
+): ShoppingListCategory[] {
+  const storeLookup = buildStoreLookup(promotions);
+  const grouped = new Map<string, ShoppingListItem[]>();
+
+  for (const category of categories) {
+    for (const item of category.items) {
+      const storeName = getItemStoreName(item, promotions, storeLookup);
+      const items = grouped.get(storeName) ?? [];
+      items.push(item);
+      grouped.set(storeName, items);
+    }
   }
 
   return Array.from(grouped.entries())

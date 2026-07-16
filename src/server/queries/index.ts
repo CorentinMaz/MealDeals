@@ -94,7 +94,7 @@ export async function getRecipePlan(planId: string) {
 }
 
 export async function getRecipePlansHistory(limit?: number) {
-  return db.recipePlan.findMany({
+  const plans = await db.recipePlan.findMany({
     where: { householdId: "default" },
     orderBy: { createdAt: "desc" },
     ...(limit ? { take: limit } : {}),
@@ -103,13 +103,23 @@ export async function getRecipePlansHistory(limit?: number) {
         select: {
           id: true,
           name: true,
+          estimatedCost: true,
           isFavorite: true,
           makeRegularly: true,
         },
+        orderBy: { createdAt: "asc" },
       },
       _count: { select: { recipes: true } },
     },
   });
+
+  return plans.map((plan) => ({
+    ...plan,
+    recipes: plan.recipes.map((recipe) => ({
+      ...recipe,
+      estimatedCost: Number(recipe.estimatedCost),
+    })),
+  }));
 }
 
 export async function getSavedRecipes() {

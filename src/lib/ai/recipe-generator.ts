@@ -25,9 +25,13 @@ export async function generateRecipesFromPromotions(
     .slice(0, 120)
     .map((promotion) => {
       const price = promotion.salePrice?.toString() ?? "?";
-      return `- ${promotion.name} (${promotion.store.name}) — ${price}$`;
+      return `- ${promotion.name} [${promotion.store.slug}] (${promotion.store.name}) — ${price}$`;
     })
     .join("\n");
+
+  const storeSlugs = [
+    ...new Set(input.promotions.map((promotion) => promotion.store.slug)),
+  ].join(", ");
 
   const nutritionProfile = nutritionProfileFromPreferences(input.preferences);
   const nutritionSection = buildNutritionPromptSection(
@@ -58,15 +62,18 @@ Contraintes:
 ${nutritionSection}
 ${savedRecipesSection}
 
-Promotions disponibles:
+Promotions en cours (circulaires actuelles uniquement):
 ${promotionSummary}
 
 Règles importantes:
-1. Priorise les produits en promotion.
+1. Priorise les produits listés ci-dessus.
 2. Réutilise les mêmes ingrédients entre plusieurs recettes pour limiter le gaspillage.
 3. Complète avec des ingrédients non en promotion seulement si nécessaire.
 4. Les recettes doivent être réalistes pour des familles québécoises.
 5. ${requireNutrition ? "Inclus OBLIGATOIREMENT les valeurs nutritionnelles par portion." : "Inclus des valeurs nutritionnelles estimées par portion si possible."}
+6. isOnSale ne peut être true QUE si l'ingrédient correspond à un produit de la liste « Promotions en cours ».
+7. Si isOnSale est true, storeSlug doit être le slug exact entre crochets du produit (ex: ${storeSlugs || "maxi"}).
+8. N'invente aucun rabais et n'utilise jamais un produit absent de la liste ci-dessus.
 
 Réponds avec ce JSON:
 {

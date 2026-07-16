@@ -1,5 +1,6 @@
 "use client";
 
+import { RecipeGenerationOverlay } from "@/components/features/recipe-generation-overlay";
 import { useState, useTransition } from "react";
 import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
@@ -28,7 +29,14 @@ export function GenerateRecipesForm({
   const t = useTranslate();
 
   return (
-    <Card>
+    <>
+      <RecipeGenerationOverlay
+        open={isPending}
+        title={t("pages.recipes.generatingTitle")}
+        subtitle={t("pages.recipes.generatingSubtitle")}
+      />
+
+      <Card>
       <CardHeader>
         <CardTitle>{t("pages.recipes.cardTitle")}</CardTitle>
       </CardHeader>
@@ -45,6 +53,7 @@ export function GenerateRecipesForm({
           </label>
           <Select
             value={recipeCount}
+            disabled={isPending}
             items={RECIPE_COUNTS.map((count) => ({
               value: String(count),
               label: t("pages.recipes.recipeCountOption", { count }),
@@ -86,5 +95,6 @@ export function GenerateRecipesForm({
         </Button>
       </CardContent>
     </Card>
+    </>
   );
 }

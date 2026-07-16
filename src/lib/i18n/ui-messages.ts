@@ -40,6 +40,10 @@ export const uiMessagesFr = {
     makeAgain: "À refaire",
     onSale: "En promo",
     flyerPrice: "Prix en circulaire",
+    regularPrice: "Rég.",
+    discountOff: "-{pct}%",
+    promoUnavailable:
+      "Ce rabais n'apparaît plus dans les circulaires actuelles.",
     products: "produits",
     all: "Tout",
     none: "Aucune",
@@ -111,6 +115,9 @@ export const uiMessagesFr = {
       recipeCount: "Combien de recettes ?",
       recipeCountOption: "{count} recettes",
       generate: "Créer mon menu",
+      generatingTitle: "On prépare ton menu…",
+      generatingSubtitle:
+        "On combine les rabais de la semaine pour te proposer des recettes savoureuses.",
       emptySelection:
         "Tu n'as pas encore choisi de recettes. On regarde ce qui est en rabais ?",
     },
@@ -131,6 +138,8 @@ export const uiMessagesFr = {
       favoriteCount: "{count} coup(s) de cœur",
       regularCount: "{count} classique(s)",
       andMore: "… et {count} autre(s)",
+      weeklyTotal: "Total estimé : ~{amount}$",
+      weeklyTotalShort: "~{amount}$",
     },
     settings: {
       title: "Mes préférences",
@@ -157,6 +166,8 @@ export const uiMessagesFr = {
       generatedOn: "Menu créé le {date}",
       tabRecipes: "Recettes",
       tabShoppingList: "Liste d'épicerie",
+      shoppingListSortCategory: "Par catégorie",
+      shoppingListSortStore: "Par magasin",
       noShoppingList: "Pas encore de liste d'épicerie.",
       exportAll: "Menu complet (PDF)",
       exportRecipes: "Recettes (PDF)",
@@ -300,6 +311,9 @@ export const uiMessagesEn = {
     makeAgain: "Make again",
     onSale: "On sale",
     flyerPrice: "Flyer price",
+    regularPrice: "Reg.",
+    discountOff: "-{pct}%",
+    promoUnavailable: "This deal is no longer in the current flyers.",
     products: "products",
     all: "All",
     none: "None",
@@ -365,6 +379,9 @@ export const uiMessagesEn = {
       recipeCount: "Number of recipes",
       recipeCountOption: "{count} recipes",
       generate: "Generate recipes",
+      generatingTitle: "Building your menu…",
+      generatingSubtitle:
+        "We're matching this week's deals to tasty, budget-friendly recipes.",
       emptySelection:
         "You haven't picked any recipes yet. Want to see what's on sale?",
     },
@@ -385,6 +402,8 @@ export const uiMessagesEn = {
       favoriteCount: "{count} favorite(s)",
       regularCount: "{count} regular(s)",
       andMore: "… and {count} more",
+      weeklyTotal: "Estimated total: ~{amount}$",
+      weeklyTotalShort: "~{amount}$",
     },
     settings: {
       title: "Settings",
@@ -409,6 +428,8 @@ export const uiMessagesEn = {
       generatedOn: "Menu generated on {date}",
       tabRecipes: "Recipes",
       tabShoppingList: "Shopping list",
+      shoppingListSortCategory: "By category",
+      shoppingListSortStore: "By store",
       noShoppingList: "No shopping list generated.",
       exportAll: "Full menu (PDF)",
       exportRecipes: "Recipes (PDF)",

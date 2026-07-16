@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createAppError } from "@/lib/errors";
 import { db } from "@/lib/db";
 import { generateRecipesFromPromotions } from "@/lib/ai/recipe-generator";
+import { bindIngredientsToActivePromotions } from "@/lib/promotions/match-ingredient";
 import { getActivePromotions } from "@/lib/promotions/sync-service";
 import { buildShoppingList } from "@/lib/shopping-list/generator";
 import { getSavedRecipesForGeneration } from "@/server/queries";
@@ -36,13 +37,25 @@ export async function generateRecipesAction(recipeCount: number) {
     savedRecipes,
   });
 
+  const storeNames = Object.fromEntries(
+    promotions.map((promotion) => [promotion.store.slug, promotion.store.name]),
+  );
+
+  const enrichedRecipes = generated.recipes.map((recipe) => ({
+    ...recipe,
+    ingredients: bindIngredientsToActivePromotions(
+      recipe.ingredients,
+      promotions,
+    ),
+  }));
+
   const plan = await db.recipePlan.create({
     data: {
       householdId: "default",
       recipeCount,
       status: "generated",
       recipes: {
-        create: generated.recipes.map((recipe) => ({
+        create: enrichedRecipes.map((recipe) => ({
           name: recipe.name,
           description: recipe.description,
           prepMinutes: recipe.prepMinutes,
@@ -59,7 +72,8 @@ export async function generateRecipesAction(recipeCount: number) {
       shoppingList: {
         create: {
           items: buildShoppingList(
-            generated.recipes,
+            enrichedRecipes,
+            storeNames,
           ) as unknown as Prisma.InputJsonValue,
         },
       },

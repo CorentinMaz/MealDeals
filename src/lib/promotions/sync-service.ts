@@ -115,6 +115,7 @@ export async function syncAllEnabledStores(postalCode: string) {
 
 async function persistPromotions(storeId: string, promotions: RawPromotion[]) {
   const now = new Date();
+  const externalIds = promotions.map((promotion) => promotion.externalId);
 
   await db.$transaction(async (tx) => {
     await tx.promotion.deleteMany({
@@ -123,6 +124,17 @@ async function persistPromotions(storeId: string, promotions: RawPromotion[]) {
         validTo: { lt: now },
       },
     });
+
+    if (externalIds.length > 0) {
+      await tx.promotion.deleteMany({
+        where: {
+          storeId,
+          externalId: { notIn: externalIds },
+        },
+      });
+    } else {
+      await tx.promotion.deleteMany({ where: { storeId } });
+    }
 
     for (const promotion of promotions) {
       await tx.promotion.upsert({
@@ -183,7 +195,7 @@ export async function getActivePromotions(storeIds?: string[]) {
     },
     include: {
       store: {
-        select: { id: true, name: true, slug: true },
+        select: { id: true, name: true, slug: true, logoUrl: true },
       },
     },
     orderBy: [{ discountPct: "desc" }, { salePrice: "asc" }],

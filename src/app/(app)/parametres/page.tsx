@@ -1,8 +1,6 @@
 import { PreferencesForm } from "@/components/features/preferences-form";
-import {
-  NutritionGoalsForm,
-  NutritionGoalsSummary,
-} from "@/components/features/nutrition-goals-form";
+import { NutritionGoalsForm } from "@/components/features/nutrition-goals-form";
+import { NutritionGoalsSummary } from "@/components/features/nutrition-goals-summary";
 import { PostalCodeForm } from "@/components/features/postal-code-form";
 import { StoreToggle } from "@/components/features/store-toggle";
 import { PageShell } from "@/components/layout/page-shell";

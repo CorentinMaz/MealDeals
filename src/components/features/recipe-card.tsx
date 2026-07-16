@@ -1,21 +1,36 @@
+import { RecipeIngredientList } from "@/components/features/recipe-ingredient-list";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { RecipeFeedbackButtons } from "@/components/features/recipe-feedback-buttons";
+import type {
+  PromotionSnapshot,
+  RecipeIngredientRef,
+} from "@/lib/promotions/types";
 import type { Recipe } from "@/generated/prisma/client";
 import { Heart, RotateCcw } from "lucide-react";
 
-interface RecipeIngredient {
-  name: string;
-  quantity: string;
-  isOnSale?: boolean;
-  storeSlug?: string;
-  estimatedPrice?: number;
-}
+type RecipeCardLabels = {
+  onSale: string;
+  flyerPrice: string;
+  regularPrice: string;
+  discount: string;
+  promoUnavailable: string;
+  ingredients: string;
+  steps: string;
+  regular: string;
+  favorite: string;
+};
 
-export function RecipeCard({ recipe }: { recipe: Recipe }) {
-  const ingredients = recipe.ingredients as unknown as RecipeIngredient[];
-
+export function RecipeCard({
+  recipe,
+  promotions = [],
+  labels,
+}: {
+  recipe: Recipe;
+  promotions?: PromotionSnapshot[];
+  labels: RecipeCardLabels;
+}) {
   return (
     <Card>
       <CardHeader>
@@ -29,13 +44,13 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
             {recipe.makeRegularly ? (
               <Badge variant="secondary">
                 <RotateCcw className="mr-1 size-3" />
-                Régulier
+                {labels.regular}
               </Badge>
             ) : null}
             {recipe.isFavorite ? (
               <Badge variant="outline">
                 <Heart className="mr-1 size-3 fill-current" />
-                Favori
+                {labels.favorite}
               </Badge>
             ) : null}
           </div>
@@ -65,24 +80,25 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
           </div>
         )}
 
-        <div>
-          <h4 className="mb-2 font-medium">Ingrédients</h4>
-          <ul className="space-y-1 text-sm">
-            {ingredients.map((ingredient) => (
-              <li key={`${ingredient.name}-${ingredient.quantity}`}>
-                {ingredient.quantity} {ingredient.name}
-                {ingredient.isOnSale ? (
-                  <span className="ml-2 text-primary">en promo</span>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <RecipeIngredientList
+          ingredients={
+            recipe.ingredients as unknown as RecipeIngredientRef[]
+          }
+          promotions={promotions}
+          ingredientsTitle={labels.ingredients}
+          labels={{
+            onSale: labels.onSale,
+            flyerPrice: labels.flyerPrice,
+            regularPrice: labels.regularPrice,
+            discount: labels.discount,
+            promoUnavailable: labels.promoUnavailable,
+          }}
+        />
 
         <Separator />
 
         <div>
-          <h4 className="mb-2 font-medium">Étapes</h4>
+          <h4 className="mb-2 font-medium">{labels.steps}</h4>
           <ol className="list-decimal space-y-2 pl-5 text-sm">
             {recipe.steps.map((step) => (
               <li key={step}>{step}</li>

@@ -23,6 +23,10 @@ export const en: Messages = {
     AI_INVALID_RESPONSE:
       "Invalid AI response — unexpected format. Please try again.",
     AI_EMPTY_RESPONSE: "Empty AI response — no content received.",
+    AI_OVERLOADED:
+      "The AI service is overloaded right now. Please try again in a moment.",
+    AI_RATE_LIMITED:
+      "Too many requests sent to the AI. Wait a moment and try again.",
     UNSUPPORTED_AI_PROVIDER: "Unsupported AI provider: {provider}",
     UPDATE_ERROR: "Update failed",
     SAVE_ERROR: "Save failed",

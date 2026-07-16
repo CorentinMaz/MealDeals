@@ -188,6 +188,7 @@ function writeRecipesSection(writer: PdfWriter, recipes: PlanPdfRecipe[]) {
 function writeShoppingSection(
   writer: PdfWriter,
   shoppingList: ShoppingListCategory[],
+  groupedByStore = false,
 ) {
   writer.addSectionTitle("Liste d'épicerie");
 
@@ -208,8 +209,11 @@ function writeShoppingSection(
         item.estimatedPrice > 0
           ? ` · ~${formatMoney(item.estimatedPrice)}`
           : "";
+      const storeSuffix = groupedByStore
+        ? ""
+        : ` (${item.recommendedStore})`;
       writer.addBulletLine(
-        `${item.name} — ${item.quantity} (${item.recommendedStore})${promo}${price}`,
+        `${item.name} — ${item.quantity}${storeSuffix}${promo}${price}`,
       );
       total += item.estimatedPrice;
     }
@@ -221,9 +225,14 @@ function writeShoppingSection(
   }
 }
 
+export interface PlanPdfOptions {
+  shoppingListGroupedByStore?: boolean;
+}
+
 export function generatePlanPdf(
   input: PlanPdfInput,
   type: PlanPdfExportType,
+  options: PlanPdfOptions = {},
 ): ArrayBuffer {
   const writer = new PdfWriter();
 
@@ -249,7 +258,11 @@ export function generatePlanPdf(
   }
 
   if (type === "shopping" || type === "all") {
-    writeShoppingSection(writer, input.shoppingList);
+    writeShoppingSection(
+      writer,
+      input.shoppingList,
+      options.shoppingListGroupedByStore,
+    );
   }
 
   return writer.toArrayBuffer();

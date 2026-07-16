@@ -23,6 +23,10 @@ export const fr: Messages = {
     AI_INVALID_RESPONSE:
       "Réponse inattendue — réessaie dans un instant.",
     AI_EMPTY_RESPONSE: "Réponse vide — on n'a rien reçu. Réessaie ?",
+    AI_OVERLOADED:
+      "Le service IA est surchargé en ce moment. Réessaie dans quelques instants.",
+    AI_RATE_LIMITED:
+      "Trop de demandes envoyées à l'IA. Attends un moment et réessaie.",
     UNSUPPORTED_AI_PROVIDER: "Ce fournisseur n'est pas supporté : {provider}",
     UPDATE_ERROR: "La mise à jour a échoué",
     SAVE_ERROR: "L'enregistrement a échoué",

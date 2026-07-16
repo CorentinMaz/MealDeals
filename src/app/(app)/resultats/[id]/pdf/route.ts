@@ -1,6 +1,11 @@
 import { notFound } from "next/navigation";
 import type { Recipe } from "@/generated/prisma/client";
-import type { ShoppingListCategory } from "@/lib/shopping-list/generator";
+import { serializePromotionSnapshot } from "@/lib/promotions/match-ingredient";
+import { getActivePromotions } from "@/lib/promotions/sync-service";
+import {
+  groupShoppingListByStore,
+  type ShoppingListCategory,
+} from "@/lib/shopping-list/generator";
 import {
   generatePlanPdf,
   planPdfFilename,
@@ -10,9 +15,15 @@ import {
 import { getRecipePlan } from "@/server/queries";
 
 const VALID_TYPES: PlanPdfExportType[] = ["recipes", "shopping", "all"];
+const VALID_SORT_MODES = ["category", "store"] as const;
+type ShoppingListSortMode = (typeof VALID_SORT_MODES)[number];
 
 function isExportType(value: string | null): value is PlanPdfExportType {
   return value !== null && VALID_TYPES.includes(value as PlanPdfExportType);
+}
+
+function isSortMode(value: string | null): value is ShoppingListSortMode {
+  return value !== null && VALID_SORT_MODES.includes(value as ShoppingListSortMode);
 }
 
 function toPdfRecipe(recipe: Recipe): PlanPdfRecipe {
@@ -39,14 +50,26 @@ export async function GET(
   const { searchParams } = new URL(request.url);
   const typeParam = searchParams.get("type") ?? "all";
   const type: PlanPdfExportType = isExportType(typeParam) ? typeParam : "all";
+  const sortParam = searchParams.get("sort");
+  const sortMode: ShoppingListSortMode = isSortMode(sortParam)
+    ? sortParam
+    : "category";
 
-  const plan = await getRecipePlan(id);
+  const [plan, promotions] = await Promise.all([
+    getRecipePlan(id),
+    sortMode === "store" ? getActivePromotions() : Promise.resolve([]),
+  ]);
   if (!plan) {
     notFound();
   }
 
-  const shoppingList = (plan.shoppingList?.items ??
+  let shoppingList = (plan.shoppingList?.items ??
     []) as unknown as ShoppingListCategory[];
+
+  if (sortMode === "store" && shoppingList.length > 0) {
+    const promotionSnapshots = promotions.map(serializePromotionSnapshot);
+    shoppingList = groupShoppingListByStore(shoppingList, promotionSnapshots);
+  }
 
   const pdf = generatePlanPdf(
     {
@@ -55,6 +78,7 @@ export async function GET(
       shoppingList,
     },
     type,
+    { shoppingListGroupedByStore: sortMode === "store" },
   );
 
   const filename = planPdfFilename(plan.createdAt, type);

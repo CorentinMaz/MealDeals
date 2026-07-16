@@ -20,6 +20,13 @@ export function formatLocalizedDate(
   });
 }
 
+export function formatMoney(amount: number, locale: Locale): string {
+  return new Intl.NumberFormat(localeToDateLocale(locale), {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
 export function formatLocalizedDistance(
   date: Date,
   locale: Locale,

@@ -49,3 +49,28 @@ export interface FlippFlyerItem {
   cutout_image_url?: string;
   display_type?: number;
 }
+
+/** Serializable promotion data for client-side ingredient hover previews. */
+export type PromotionSnapshot = {
+  id: string;
+  name: string;
+  salePrice: string | null;
+  regularPrice: string | null;
+  unit: string | null;
+  discountPct: number | null;
+  imageUrl: string | null;
+  store: {
+    name: string;
+    slug: string;
+    logoUrl: string | null;
+  };
+};
+
+export type RecipeIngredientRef = {
+  name: string;
+  quantity: string;
+  isOnSale?: boolean;
+  storeSlug?: string;
+  estimatedPrice?: number;
+  promotionId?: string;
+};

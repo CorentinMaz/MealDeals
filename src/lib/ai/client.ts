@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import Anthropic, { APIError } from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { z } from "zod";
 import { createAppError } from "@/lib/errors";
@@ -12,7 +12,7 @@ export interface AiClientConfig {
 }
 
 const SYSTEM_PROMPT =
-  "Tu es un chef et nutritionniste québécois. Réponds uniquement en JSON valide selon le schéma demandé. Privilégie les produits en promotion, réutilise les ingrédients entre recettes, et respecte les contraintes alimentaires.";
+  "Tu es un chef et nutritionniste québécois. Réponds uniquement en JSON valide selon le schéma demandé. Utilise exclusivement les promotions listées dans le message utilisateur pour marquer isOnSale. Privilégie les produits en promotion en cours, réutilise les ingrédients entre recettes, et respecte les contraintes alimentaires.";
 
 const DEFAULT_MODELS: Record<AiProvider, string> = {
   anthropic: "claude-sonnet-4-6",
@@ -24,6 +24,7 @@ const recipeIngredientSchema = z.object({
   quantity: z.string(),
   isOnSale: z.boolean(),
   storeSlug: z.string().optional(),
+  promotionId: z.string().optional(),
   estimatedPrice: z.number().optional(),
 });
 
@@ -99,6 +100,19 @@ function parseRecipeGeneration(content: string): RecipeGenerationResult {
   }
 }
 
+function mapAiProviderError(error: unknown): never {
+  if (error instanceof APIError) {
+    if (error.status === 529 || error.type === "overloaded_error") {
+      throw createAppError("AI_OVERLOADED");
+    }
+    if (error.status === 429) {
+      throw createAppError("AI_RATE_LIMITED");
+    }
+  }
+
+  throw error;
+}
+
 export function createAiClient(config: AiClientConfig = {}) {
   const provider = resolveProvider(config);
   const model =
@@ -106,7 +120,9 @@ export function createAiClient(config: AiClientConfig = {}) {
   const apiKey = resolveApiKey(provider, config);
 
   const anthropic =
-    provider === "anthropic" ? new Anthropic({ apiKey }) : null;
+    provider === "anthropic"
+      ? new Anthropic({ apiKey, maxRetries: 5 })
+      : null;
   const openai = provider === "openai" ? new OpenAI({ apiKey }) : null;
 
   return {
@@ -114,22 +130,25 @@ export function createAiClient(config: AiClientConfig = {}) {
     model,
     async generateRecipes(prompt: string): Promise<RecipeGenerationResult> {
       if (anthropic) {
-        const response = await anthropic.messages.create({
-          model,
-          max_tokens: 16_384,
-          temperature: 0.7,
-          system: SYSTEM_PROMPT,
-          messages: [{ role: "user", content: prompt }],
-        });
+        try {
+          const response = await anthropic.messages.create({
+            model,
+            max_tokens: 16_384,
+            system: SYSTEM_PROMPT,
+            messages: [{ role: "user", content: prompt }],
+          });
 
-        const textBlock = response.content.find(
-          (block) => block.type === "text",
-        );
-        if (!textBlock || textBlock.type !== "text") {
-          throw createAppError("AI_EMPTY_RESPONSE");
+          const textBlock = response.content.find(
+            (block) => block.type === "text",
+          );
+          if (!textBlock || textBlock.type !== "text") {
+            throw createAppError("AI_EMPTY_RESPONSE");
+          }
+
+          return parseRecipeGeneration(textBlock.text);
+        } catch (error) {
+          mapAiProviderError(error);
         }
-
-        return parseRecipeGeneration(textBlock.text);
       }
 
       if (openai) {
