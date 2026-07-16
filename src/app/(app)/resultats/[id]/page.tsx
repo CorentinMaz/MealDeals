@@ -10,6 +10,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ShoppingListCategory } from "@/lib/shopping-list/generator";
 import { cn } from "@/lib/utils";
+import { getServerLocale, getServerTranslator } from "@/lib/i18n/server";
 import { getRecipePlan, getSettingsData } from "@/server/queries";
 
 export const dynamic = "force-dynamic";
@@ -20,9 +21,11 @@ export default async function ResultsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [plan, { household }] = await Promise.all([
+  const [plan, { household }, t, locale] = await Promise.all([
     getRecipePlan(id),
     getSettingsData(),
+    getServerTranslator(),
+    getServerLocale(),
   ]);
 
   if (!plan) {
@@ -45,13 +48,17 @@ export default async function ResultsPage({
               )}
             >
               <ArrowLeft className="mr-1.5 size-3.5" strokeWidth={1.75} />
-              Retour à la génération
+              {t("common.backToGeneration")}
             </Link>
-            <h1 className="text-xl font-semibold tracking-tight">
-              Résultats — {plan.recipes.length} recettes
+            <h1>
+              {t("pages.results.title", { count: plan.recipes.length })}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Menu généré le {plan.createdAt.toLocaleDateString("fr-CA")}
+              {t("pages.results.generatedOn", {
+                date: plan.createdAt.toLocaleDateString(
+                  locale === "fr" ? "fr-CA" : "en-CA",
+                ),
+              })}
             </p>
           </div>
           <PlanExportButtons planId={plan.id} />

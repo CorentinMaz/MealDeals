@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, Search, Tag, X } from "lucide-react";
 import { PromotionCard } from "@/components/features/promotion-card";
+import { StoreBrandMark } from "@/components/brand/store-brand-mark";
 import { PagePanel } from "@/components/layout/page-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,8 @@ export type PromotionListItem = {
 export type StoreListItem = {
   id: string;
   name: string;
+  slug: string;
+  logoUrl?: string | null;
 };
 
 interface PromotionsBrowserProps {
@@ -205,11 +208,7 @@ export function PromotionsBrowser({
 
       <div className="space-y-4">
         {promotionsByStore.map(({ store, items }) => (
-          <StorePromotionsSection
-            key={store.id}
-            storeName={store.name}
-            items={items}
-          />
+          <StorePromotionsSection key={store.id} store={store} items={items} />
         ))}
       </div>
     </div>
@@ -275,7 +274,7 @@ function StoreFilterPanel({
 
   return (
     <PagePanel className="overflow-hidden">
-      <div className="flex items-center justify-between gap-2 border-b border-border/40 px-4 py-3">
+      <div className="flex items-center justify-between gap-2 border-b border-border/40 px-6 py-4">
         <div>
           <p className="text-sm font-medium text-foreground">
             {t("pages.promotions.filterByStore")}
@@ -296,22 +295,28 @@ function StoreFilterPanel({
           </Button>
         </div>
       </div>
-      <ul className="grid gap-1 p-2 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid gap-1 p-3 sm:grid-cols-2 lg:grid-cols-3">
         {stores.map((store) => {
           const checked = selectedStoreIds.has(store.id);
           const count = promotionCountByStore.get(store.id) ?? 0;
 
           return (
             <li key={store.id}>
-              <label className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted/40">
+              <label className="flex cursor-pointer items-center gap-3 rounded-[var(--radius-card)] px-4 py-3 hover:bg-muted/40">
                 <Checkbox
                   checked={checked}
                   onCheckedChange={(value) =>
                     onToggleStore(store.id, value === true)
                   }
                 />
-                <span className="flex-1 text-sm font-medium">{store.name}</span>
-                <Badge variant="secondary" className="text-xs">
+                <StoreBrandMark
+                  name={store.name}
+                  slug={store.slug}
+                  logoUrl={store.logoUrl}
+                  muted={false}
+                  className="flex-1 text-sm font-medium"
+                />
+                <Badge variant="secondary" className="text-xs tabular-nums">
                   {count}
                 </Badge>
               </label>
@@ -324,10 +329,10 @@ function StoreFilterPanel({
 }
 
 function StorePromotionsSection({
-  storeName,
+  store,
   items,
 }: {
-  storeName: string;
+  store: StoreListItem;
   items: PromotionListItem[];
 }) {
   const t = useTranslate();
@@ -336,9 +341,15 @@ function StorePromotionsSection({
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
       <PagePanel className="overflow-hidden">
-        <CollapsibleTrigger className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-muted/40">
+        <CollapsibleTrigger className="flex w-full items-center justify-between px-6 py-4 text-left transition-colors hover:bg-muted/40">
           <div className="flex items-center gap-3">
-            <h2 className="text-base font-medium">{storeName}</h2>
+            <StoreBrandMark
+              name={store.name}
+              slug={store.slug}
+              logoUrl={store.logoUrl}
+              muted={false}
+              className="text-base font-medium"
+            />
             <Badge variant="secondary">
               {items.length} {t("common.products")}
             </Badge>
@@ -353,19 +364,22 @@ function StorePromotionsSection({
         </CollapsibleTrigger>
         <CollapsibleContent className="border-t border-border/60">
           {items.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-muted-foreground">
+            <p className="px-6 py-4 text-sm text-muted-foreground">
               {t("pages.promotions.noStorePromotions")}
             </p>
           ) : (
-            <div className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {items.map((promotion) => (
                 <PromotionCard
                   key={promotion.id}
                   name={promotion.name}
-                  storeName={storeName}
+                  storeName={store.name}
+                  storeSlug={store.slug}
+                  storeLogoUrl={store.logoUrl}
                   salePrice={promotion.salePrice}
                   unit={promotion.unit}
                   imageUrl={promotion.imageUrl}
+                  flyerPriceLabel={t("common.flyerPrice")}
                 />
               ))}
             </div>

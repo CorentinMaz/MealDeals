@@ -24,9 +24,7 @@ export default async function HistoriquePage() {
     <PageShell width="lg">
       <div className="space-y-6">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">
-            {t("pages.history.title")}
-          </h1>
+          <h1>{t("pages.history.title")}</h1>
           <p className="text-sm text-muted-foreground">
             {t("pages.history.subtitle")}
           </p>

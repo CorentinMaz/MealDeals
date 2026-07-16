@@ -5,17 +5,29 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-inter-fallback: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+  --font-geist-fallback: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* MealDeals brand tokens */
+  --color-primary: #1b4332;
+  --color-secondary: #40916c;
+  --color-accent: #e76f51;
+  --color-bg-main: #fafaf8;
+  --color-bg-card: #ffffff;
+  --color-text-main: #1a1a2e;
+  --color-text-muted: #6b7280;
+  --color-border: #e6e6e2;
+  --radius-card: 16px;
+  --radius-button: 9999px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter), var(--font-inter-fallback);
+  --font-sans: var(--font-geist), var(--font-geist-fallback);
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
     Consolas, "Liberation Mono", "Courier New", monospace;
-  --font-heading: var(--font-inter), var(--font-inter-fallback);
+  --font-heading: var(--font-outfit), var(--font-geist-fallback);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -45,6 +57,8 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-deal: #e76f51;
+  --color-brand-secondary: #40916c;
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -55,38 +69,38 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.527 0.154 150.069);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --background: var(--color-bg-main);
+  --foreground: var(--color-text-main);
+  --card: var(--color-bg-card);
+  --card-foreground: var(--color-text-main);
+  --popover: var(--color-bg-card);
+  --popover-foreground: var(--color-text-main);
+  --primary: var(--color-primary);
+  --primary-foreground: #ffffff;
+  --secondary: color-mix(in srgb, var(--color-secondary) 14%, white);
+  --secondary-foreground: var(--color-primary);
+  --muted: color-mix(in srgb, var(--color-bg-main) 60%, var(--color-border));
+  --muted-foreground: var(--color-text-muted);
+  --accent: color-mix(in srgb, var(--color-secondary) 10%, white);
+  --accent-foreground: var(--color-text-main);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --border: var(--color-border);
+  --input: var(--color-border);
+  --ring: color-mix(in srgb, var(--color-secondary) 40%, transparent);
+  --chart-1: var(--color-secondary);
+  --chart-2: var(--color-primary);
+  --chart-3: var(--color-accent);
+  --chart-4: var(--color-text-muted);
+  --chart-5: var(--color-border);
+  --radius: var(--radius-card);
+  --sidebar: var(--color-bg-card);
+  --sidebar-foreground: var(--color-text-main);
+  --sidebar-primary: var(--color-primary);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: color-mix(in srgb, var(--color-secondary) 8%, white);
+  --sidebar-accent-foreground: var(--color-text-main);
+  --sidebar-border: var(--color-border);
+  --sidebar-ring: color-mix(in srgb, var(--color-secondary) 40%, transparent);
 }
 
 .dark {
@@ -126,11 +140,13 @@
 body {
   font-family: var(--font-sans), system-ui, sans-serif;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  font-weight: 400;
 }
 
 .font-heading {
   font-family: var(--font-heading);
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 @layer base {
@@ -146,9 +162,18 @@ body {
     @apply bg-background text-foreground text-[0.8125rem] leading-relaxed;
   }
   h1,
-  h2,
+  h2 {
+    @apply font-heading text-xl font-bold tracking-tight text-primary sm:text-2xl;
+  }
   h3,
   h4 {
-    @apply font-heading tracking-tight;
+    @apply font-sans text-base font-medium tracking-tight text-foreground;
+  }
+}
+
+@layer utilities {
+  .store-logo-muted {
+    filter: grayscale(1) brightness(0.85) contrast(0.9);
+    opacity: 0.7;
   }
 }

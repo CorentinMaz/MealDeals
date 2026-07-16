@@ -93,30 +93,38 @@ export function PreferencesForm({ preferences }: PreferencesFormProps) {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="maxPrepMinutes">{t("forms.maxPrepMinutes")}</Label>
-          <Input
-            id="maxPrepMinutes"
-            name="maxPrepMinutes"
-            type="number"
-            min={15}
-            max={120}
-            step={5}
-            defaultValue={preferences.maxPrepMinutes}
-          />
+      <div className="space-y-4 border-t border-border/60 pt-6">
+        <div>
+          <h3 className="text-sm font-medium">{t("pages.settings.savings")}</h3>
+          <p className="text-sm text-muted-foreground">
+            {t("pages.settings.savingsDescription")}
+          </p>
         </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="maxPrepMinutes">{t("forms.maxPrepMinutes")}</Label>
+            <Input
+              id="maxPrepMinutes"
+              name="maxPrepMinutes"
+              type="number"
+              min={15}
+              max={120}
+              step={5}
+              defaultValue={preferences.maxPrepMinutes}
+            />
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="weeklyBudget">{t("forms.weeklyBudget")}</Label>
-          <Input
-            id="weeklyBudget"
-            name="weeklyBudget"
-            type="number"
-            min={50}
-            step={10}
-            defaultValue={String(preferences.weeklyBudget)}
-          />
+          <div className="space-y-2">
+            <Label htmlFor="weeklyBudget">{t("forms.weeklyBudget")}</Label>
+            <Input
+              id="weeklyBudget"
+              name="weeklyBudget"
+              type="number"
+              min={50}
+              step={10}
+              defaultValue={String(preferences.weeklyBudget)}
+            />
+          </div>
         </div>
       </div>
 

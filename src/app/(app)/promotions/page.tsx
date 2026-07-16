@@ -23,6 +23,8 @@ export default async function PromotionsPage() {
     .map((store) => ({
       id: store.id,
       name: store.name,
+      slug: store.slug,
+      logoUrl: store.logoUrl,
     }));
 
   const promotionItems = promotions.map((promotion) => ({
@@ -41,9 +43,7 @@ export default async function PromotionsPage() {
       <div className="space-y-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-xl font-semibold tracking-tight">
-              {t("pages.promotions.title")}
-            </h1>
+            <h1>{t("pages.promotions.title")}</h1>
             <p className="text-sm text-muted-foreground">
               {t("pages.promotions.subtitle")}
             </p>

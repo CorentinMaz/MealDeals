@@ -18,9 +18,7 @@ export default async function RecipesPage() {
     <PageShell width="md">
       <div className="space-y-6">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">
-            {t("pages.recipes.title")}
-          </h1>
+          <h1>{t("pages.recipes.title")}</h1>
           <p className="text-sm text-muted-foreground">
             {t("pages.recipes.subtitle")}
           </p>

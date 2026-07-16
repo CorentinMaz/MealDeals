@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Calculator } from "lucide-react";
+import { useTranslate } from "@/components/providers/locale-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +20,6 @@ import {
   type GeneralActivityLevel,
 } from "@/lib/nutrition/calorie-calculator";
 import {
-  FITNESS_GOAL_LABELS,
   FITNESS_GOALS,
   isFitnessGoal,
   type FitnessGoal,
@@ -39,14 +39,13 @@ interface CalorieCalculatorProps {
   onApplyTarget?: (calories: number) => void;
 }
 
-const SEX_LABELS: Record<BiologicalSex, string> = {
-  male: "Homme",
-  female: "Femme",
-};
-
 const ACTIVITY_LEVELS = Object.keys(
   ACTIVITY_LEVEL_LABELS,
 ) as GeneralActivityLevel[];
+
+function activityMessageKey(level: GeneralActivityLevel) {
+  return level === "very_active" ? "veryActive" : level;
+}
 
 export function CalorieCalculator({
   fitnessGoal: externalFitnessGoal = null,
@@ -56,6 +55,7 @@ export function CalorieCalculator({
   showActivitySessionInputs = true,
   onApplyTarget,
 }: CalorieCalculatorProps) {
+  const t = useTranslate();
   const [sex, setSex] = useState<BiologicalSex>("male");
   const [age, setAge] = useState("30");
   const [weightKg, setWeightKg] = useState("80");
@@ -132,23 +132,21 @@ export function CalorieCalculator({
       <div className="flex items-start gap-3">
         <Calculator className="mt-0.5 size-5 shrink-0 text-primary" />
         <div>
-          <h4 className="font-medium">Calculateur de calories</h4>
+          <h4 className="font-medium">{t("forms.calorieCalculatorTitle")}</h4>
           <p className="text-sm text-muted-foreground">
-            Estimez vos besoins journaliers selon votre profil et votre objectif
-            (formule Mifflin-St Jeor). Utilisez le résultat comme objectif
-            calorique dans vos paramètres.
+            {t("forms.calorieCalculatorDescription")}
           </p>
         </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label>Sexe biologique</Label>
+          <Label>{t("forms.calorieCalculatorSex")}</Label>
           <Select
             value={sex}
             items={[
-              { value: "male", label: SEX_LABELS.male },
-              { value: "female", label: SEX_LABELS.female },
+              { value: "male", label: t("forms.calorieCalculatorSexMale") },
+              { value: "female", label: t("forms.calorieCalculatorSexFemale") },
             ]}
             onValueChange={(value) => {
               if (value === "male" || value === "female") {
@@ -160,20 +158,22 @@ export function CalorieCalculator({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="male">Homme</SelectItem>
-              <SelectItem value="female">Femme</SelectItem>
+              <SelectItem value="male">{t("forms.calorieCalculatorSexMale")}</SelectItem>
+              <SelectItem value="female">
+                {t("forms.calorieCalculatorSexFemale")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {showFitnessGoalInput ? (
           <div className="space-y-2">
-            <Label>Objectif</Label>
+            <Label>{t("forms.nutritionMainGoal")}</Label>
             <Select
               value={internalFitnessGoal}
               items={FITNESS_GOALS.map((goal) => ({
                 value: goal,
-                label: FITNESS_GOAL_LABELS[goal],
+                label: t(`nutrition.goals.${goal}`),
               }))}
               onValueChange={(value) => {
                 if (value && isFitnessGoal(value)) {
@@ -187,7 +187,7 @@ export function CalorieCalculator({
               <SelectContent>
                 {FITNESS_GOALS.map((goal) => (
                   <SelectItem key={goal} value={goal}>
-                    {FITNESS_GOAL_LABELS[goal]}
+                    {t(`nutrition.goals.${goal}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -196,7 +196,7 @@ export function CalorieCalculator({
         ) : null}
 
         <div className="space-y-2">
-          <Label>Âge</Label>
+          <Label>{t("forms.calorieCalculatorAge")}</Label>
           <Input
             type="number"
             min={14}
@@ -207,7 +207,7 @@ export function CalorieCalculator({
         </div>
 
         <div className="space-y-2">
-          <Label>Poids (kg)</Label>
+          <Label>{t("forms.calorieCalculatorWeight")}</Label>
           <Input
             type="number"
             min={30}
@@ -219,7 +219,7 @@ export function CalorieCalculator({
         </div>
 
         <div className="space-y-2">
-          <Label>Taille (cm)</Label>
+          <Label>{t("forms.calorieCalculatorHeight")}</Label>
           <Input
             type="number"
             min={120}
@@ -230,12 +230,12 @@ export function CalorieCalculator({
         </div>
 
         <div className="space-y-2 sm:col-span-2">
-          <Label>Niveau d&apos;activité général</Label>
+          <Label>{t("forms.calorieCalculatorActivityLevel")}</Label>
           <Select
             value={activityLevel}
             items={ACTIVITY_LEVELS.map((level) => ({
               value: level,
-              label: ACTIVITY_LEVEL_LABELS[level],
+              label: t(`nutrition.activity.${activityMessageKey(level)}`),
             }))}
             onValueChange={(value) => {
               if (
@@ -252,7 +252,7 @@ export function CalorieCalculator({
             <SelectContent>
               {ACTIVITY_LEVELS.map((level) => (
                 <SelectItem key={level} value={level}>
-                  {ACTIVITY_LEVEL_LABELS[level]}
+                  {t(`nutrition.activity.${activityMessageKey(level)}`)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -262,7 +262,7 @@ export function CalorieCalculator({
         {showActivitySessionInputs ? (
           <>
             <div className="space-y-2">
-              <Label>Musculation (séances / semaine)</Label>
+              <Label>{t("forms.calorieCalculatorGymSessions")}</Label>
               <Input
                 type="number"
                 min={0}
@@ -273,7 +273,7 @@ export function CalorieCalculator({
             </div>
 
             <div className="space-y-2">
-              <Label>Course (séances / semaine)</Label>
+              <Label>{t("forms.calorieCalculatorRunningSessions")}</Label>
               <Input
                 type="number"
                 min={0}
@@ -291,12 +291,12 @@ export function CalorieCalculator({
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-sm text-muted-foreground">
-                Objectif calorique recommandé
+                {t("forms.calorieCalculatorRecommended")}
               </p>
-              <p className="text-3xl font-semibold tracking-tight">
+              <p className="text-3xl font-semibold tracking-tight tabular-nums">
                 ~{result.dailyCalories}{" "}
                 <span className="text-lg font-normal text-muted-foreground">
-                  kcal / jour
+                  {t("common.kcalPerDay")}
                 </span>
               </p>
             </div>
@@ -306,25 +306,31 @@ export function CalorieCalculator({
                 variant="secondary"
                 onClick={() => onApplyTarget(result.dailyCalories)}
               >
-                Utiliser cet objectif
+                {t("forms.calorieCalculatorUseTarget")}
               </Button>
             ) : null}
           </div>
 
           <dl className="grid gap-2 text-sm sm:grid-cols-2">
             <div className="flex justify-between gap-2 rounded-md bg-muted/50 px-3 py-2">
-              <dt className="text-muted-foreground">Métabolisme de base (BMR)</dt>
+              <dt className="text-muted-foreground">
+                {t("forms.calorieCalculatorBmr")}
+              </dt>
               <dd className="font-medium">{result.bmr} kcal</dd>
             </div>
             <div className="flex justify-between gap-2 rounded-md bg-muted/50 px-3 py-2">
-              <dt className="text-muted-foreground">Activité (niveau)</dt>
+              <dt className="text-muted-foreground">
+                {t("forms.calorieCalculatorActivityBonus")}
+              </dt>
               <dd className="font-medium">
                 +{result.breakdown.activityFromLevel} kcal
               </dd>
             </div>
             {result.breakdown.gymBonus > 0 ? (
               <div className="flex justify-between gap-2 rounded-md bg-muted/50 px-3 py-2">
-                <dt className="text-muted-foreground">Bonus musculation</dt>
+                <dt className="text-muted-foreground">
+                  {t("forms.calorieCalculatorGymBonus")}
+                </dt>
                 <dd className="font-medium">
                   +{result.breakdown.gymBonus} kcal
                 </dd>
@@ -332,20 +338,24 @@ export function CalorieCalculator({
             ) : null}
             {result.breakdown.runningBonus > 0 ? (
               <div className="flex justify-between gap-2 rounded-md bg-muted/50 px-3 py-2">
-                <dt className="text-muted-foreground">Bonus course</dt>
+                <dt className="text-muted-foreground">
+                  {t("forms.calorieCalculatorRunningBonus")}
+                </dt>
                 <dd className="font-medium">
                   +{result.breakdown.runningBonus} kcal
                 </dd>
               </div>
             ) : null}
             <div className="flex justify-between gap-2 rounded-md bg-muted/50 px-3 py-2">
-              <dt className="text-muted-foreground">Dépense totale (TDEE)</dt>
+              <dt className="text-muted-foreground">
+                {t("forms.calorieCalculatorTdee")}
+              </dt>
               <dd className="font-medium">{result.tdee} kcal</dd>
             </div>
             <div className="flex justify-between gap-2 rounded-md bg-muted/50 px-3 py-2">
               <dt className="text-muted-foreground">
-                Ajustement (
-                {FITNESS_GOAL_LABELS[effectiveFitnessGoal!].toLowerCase()})
+                {t("forms.calorieCalculatorAdjustment")} (
+                {t(`nutrition.goals.${effectiveFitnessGoal!}`).toLowerCase()})
               </dt>
               <dd className="font-medium">
                 {result.goalAdjustment > 0 ? "+" : ""}
@@ -355,19 +365,16 @@ export function CalorieCalculator({
           </dl>
 
           <p className="text-xs text-muted-foreground">
-            Estimation indicative. Consultez un professionnel de santé pour un
-            plan personnalisé. Minimum appliqué : 1200 kcal/jour.
+            {t("forms.calorieCalculatorDisclaimer")}
           </p>
         </div>
       ) : !effectiveFitnessGoal ? (
         <p className="text-sm text-amber-600 dark:text-amber-400">
-          Choisissez d&apos;abord un objectif principal pour voir
-          l&apos;estimation.
+          {t("forms.calorieCalculatorChooseGoal")}
         </p>
       ) : (
         <p className="text-sm text-amber-600 dark:text-amber-400">
-          Entrez des valeurs valides (âge 14–100, poids 30–300 kg, taille
-          120–230 cm) pour voir l&apos;estimation.
+          {t("forms.calorieCalculatorInvalidValues")}
         </p>
       )}
     </div>

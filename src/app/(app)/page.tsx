@@ -34,9 +34,7 @@ export default async function DashboardPage() {
       <div className="space-y-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-xl font-semibold tracking-tight">
-              {t("pages.dashboard.title")}
-            </h1>
+            <h1>{t("pages.dashboard.title")}</h1>
             <p className="text-sm text-muted-foreground">
               {t("pages.dashboard.subtitle", { postalCode: data.postalCode })}
             </p>

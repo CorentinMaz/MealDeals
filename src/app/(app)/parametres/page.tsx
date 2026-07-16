@@ -27,9 +27,7 @@ export default async function SettingsPage() {
     <PageShell width="lg">
       <div className="space-y-6">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">
-            {t("pages.settings.title")}
-          </h1>
+          <h1>{t("pages.settings.title")}</h1>
           <p className="text-sm text-muted-foreground">
             {t("pages.settings.subtitle")}
           </p>

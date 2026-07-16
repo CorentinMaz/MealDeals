@@ -322,7 +322,7 @@ export function NutritionGoalsForm({ preferences }: NutritionGoalsFormProps) {
                   type="number"
                   min={1200}
                   max={6000}
-                  step={50}
+                  step={1}
                   value={dailyCalorieTarget}
                   onChange={(event) =>
                     setDailyCalorieTarget(event.target.value)

@@ -21,7 +21,7 @@ export function StoreToggle({
   const [isPending, startTransition] = useTransition();
 
   return (
-    <div className="flex items-center justify-between rounded-lg border p-4">
+    <div className="flex items-center justify-between rounded-[var(--radius-card)] border p-6">
       <div>
         <Label htmlFor={storeId} className="text-base font-medium">
           {name}

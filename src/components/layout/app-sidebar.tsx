@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChefHat } from "lucide-react";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { useTranslate } from "@/components/providers/locale-provider";
 import {
@@ -27,20 +27,20 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
-      <SidebarHeader className="border-sidebar-border border-b px-2 py-3">
+      <SidebarHeader className="border-sidebar-border border-b px-2 py-4">
         <Link
           href="/"
-          className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-sidebar-accent"
+          className="flex items-center justify-center rounded-md px-2 py-1.5 transition-colors hover:bg-sidebar-accent group-data-[collapsible=icon]:px-1"
         >
-          <span
-            className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground"
-            aria-hidden
-          >
-            <ChefHat className="size-4" strokeWidth={1.75} />
-          </span>
-          <span className="truncate text-sm font-medium tracking-tight group-data-[collapsible=icon]:hidden">
-            {t("nav.brand")}
-          </span>
+          <BrandLogo
+            variant="full"
+            priority
+            className="h-11 w-auto max-w-full group-data-[collapsible=icon]:hidden"
+          />
+          <BrandLogo
+            variant="icon"
+            className="hidden h-9 w-auto max-w-full group-data-[collapsible=icon]:block"
+          />
         </Link>
       </SidebarHeader>
 
@@ -66,7 +66,7 @@ export function AppSidebar() {
                       render={<Link href={item.href} />}
                       isActive={active}
                       tooltip={item.label}
-                      className="h-8 text-[0.8125rem] font-normal text-foreground/75 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-foreground"
+                      className="h-8 text-[0.8125rem] font-normal text-foreground/75 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-[var(--color-secondary)]"
                     >
                       <Icon className="size-4 opacity-80" strokeWidth={1.75} />
                       <span className="truncate group-data-[collapsible=icon]:hidden">

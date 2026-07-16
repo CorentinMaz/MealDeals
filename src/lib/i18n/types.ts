@@ -59,6 +59,7 @@ export interface Messages {
     settings: { label: string; description: string };
   };
   common: Record<string, string>;
+  notifications: Record<string, string>;
   pages: Record<string, Record<string, string>>;
   forms: Record<string, string>;
   nutrition: {

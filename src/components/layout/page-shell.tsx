@@ -10,8 +10,8 @@ const widthClass = {
 } as const;
 
 const paddingClass = {
-  default: "px-4 py-4 sm:px-5 sm:py-5",
-  compact: "px-3 py-3 sm:px-4 sm:py-4",
+  default: "px-6 py-6 sm:px-8 sm:py-8",
+  compact: "px-4 py-4 sm:px-6 sm:py-6",
   none: "p-0",
 } as const;
 
@@ -62,7 +62,7 @@ export function PagePanel({
   return (
     <section
       className={cn(
-        "rounded-xl border border-border/60 bg-card/50 shadow-sm",
+        "rounded-[var(--radius-card)] border border-border/60 bg-card shadow-sm",
         className,
       )}
     >

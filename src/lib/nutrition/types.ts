@@ -24,7 +24,7 @@ export const FITNESS_GOAL_DESCRIPTIONS: Record<FitnessGoal, string> = {
   cutting:
     "Repas plus légers, rassasiants et riches en protéines pour préserver la masse musculaire.",
   maintenance:
-    "Équilibre calorique pour maintenir votre poids actuel.",
+    "Un équilibre pour maintenir ton poids actuel.",
 };
 
 export interface NutritionProfileInput {
