@@ -1,0 +1,33 @@
+{
+  "name": "@mealdeals/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts"
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:seed": "tsx src/db/seed.ts",
+    "db:studio": "drizzle-kit studio --port 4783"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.111.0",
+    "@paralleldrive/cuid2": "^2.2.2",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.44.2",
+    "fast-xml-parser": "^5.10.0",
+    "openai": "^6.47.0",
+    "pg": "^8.22.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.20.0",
+    "drizzle-kit": "^0.31.4",
+    "tsx": "^4.23.1",
+    "typescript": "^5"
+  }
+}
