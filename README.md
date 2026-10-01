@@ -2,6 +2,20 @@
 
 Monorepo for a Quebec grocery promotion–based meal planner.
 
+## Screenshots
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+| Promotions | Weekly menu |
+|---|---|
+| ![Promotions](docs/screenshots/promotions.png) | ![Weekly menu](docs/screenshots/menu.png) |
+
+![Generated menu with recipe steps](docs/screenshots/results.png)
+
+| History | Preferences |
+|---|---|
+| ![History](docs/screenshots/history.png) | ![Preferences](docs/screenshots/preferences.png) |
+
 ## Stack
 
 - **packages/web** — Next.js 16 (App Router) + TypeScript + Tailwind + shadcn/ui

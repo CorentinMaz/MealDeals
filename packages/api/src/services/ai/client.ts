@@ -19,13 +19,17 @@ const DEFAULT_MODELS: Record<AiProvider, string> = {
   openai: "gpt-4o-mini",
 };
 
+// Models often send null for absent fields; treat it like a missing key.
+const optional = <T extends z.ZodTypeAny>(schema: T) =>
+  schema.nullish().transform((value) => value ?? undefined);
+
 const recipeIngredientSchema = z.object({
   name: z.string(),
   quantity: z.string(),
   isOnSale: z.boolean(),
-  storeSlug: z.string().optional(),
-  promotionId: z.string().optional(),
-  estimatedPrice: z.number().optional(),
+  storeSlug: optional(z.string()),
+  promotionId: optional(z.string()),
+  estimatedPrice: optional(z.number()),
 });
 
 export const generatedRecipeSchema = z.object({
@@ -34,10 +38,10 @@ export const generatedRecipeSchema = z.object({
   prepMinutes: z.number().int().positive(),
   difficulty: z.enum(["facile", "moyen", "difficile"]),
   estimatedCost: z.number().positive(),
-  calories: z.number().int().positive().optional(),
-  proteinG: z.number().optional(),
-  carbsG: z.number().optional(),
-  fatG: z.number().optional(),
+  calories: optional(z.number().int().positive()),
+  proteinG: optional(z.number()),
+  carbsG: optional(z.number()),
+  fatG: optional(z.number()),
   ingredients: z.array(recipeIngredientSchema).min(3),
   steps: z.array(z.string()).min(2),
 });
@@ -121,7 +125,13 @@ export function createAiClient(config: AiClientConfig = {}) {
 
   const anthropic =
     provider === "anthropic"
-      ? new Anthropic({ apiKey, maxRetries: 5 })
+      ? new Anthropic({
+          apiKey,
+          maxRetries: 5,
+          defaultHeaders: process.env.ANTHROPIC_WORKSPACE_ID
+            ? { "anthropic-workspace-id": process.env.ANTHROPIC_WORKSPACE_ID }
+            : undefined,
+        })
       : null;
   const openai = provider === "openai" ? new OpenAI({ apiKey }) : null;
 
