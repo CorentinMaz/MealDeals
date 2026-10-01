@@ -21,6 +21,7 @@ export * from "./services/nutrition/types";
 export {
   estimateDailyCalories,
   caloriesPerMeal,
+  MEALS_PER_DAY,
   type CalorieTargetResult,
 } from "./services/nutrition/calorie-target";
 export {

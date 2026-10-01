@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Recipe, UserPreferences } from "@mealdeals/api/client";
 import type { SerializedUserPreferences } from "@mealdeals/api/client";
-import { estimateDailyCalories } from "@mealdeals/api/client";
+import { estimateDailyCalories, MEALS_PER_DAY } from "@mealdeals/api/client";
 import {
   FITNESS_GOAL_LABELS,
   nutritionProfileFromPreferences,
@@ -55,9 +55,10 @@ export function PlanNutritionSummary({
     return null;
   }
 
-  const recipeCount = recipes.length;
-  const avgDailyCalories = Math.round(totals.calories / recipeCount);
-  const avgDailyProtein = Math.round(totals.proteinG / recipeCount);
+  // Each recipe is one meal: average per meal, then scale to a full day.
+  const perMeal = (value: number) => Math.round(value / totals.count);
+  const avgMealCalories = perMeal(totals.calories);
+  const estimatedDailyCalories = avgMealCalories * MEALS_PER_DAY;
   const target = estimateDailyCalories(profile);
 
   const showTarget =
@@ -66,7 +67,7 @@ export function PlanNutritionSummary({
     target !== null;
 
   const calorieDelta = showTarget
-    ? avgDailyCalories - target.dailyCalories
+    ? estimatedDailyCalories - target.dailyCalories
     : null;
 
   return (
@@ -81,15 +82,18 @@ export function PlanNutritionSummary({
           </p>
         ) : (
           <p className="text-sm text-muted-foreground">
-            Moyennes estimées par jour sur {recipeCount} repas
+            Moyennes estimées par repas, sur {totals.count} recette(s)
           </p>
         )}
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-4 text-sm">
           <div>
-            <p className="text-muted-foreground">Calories / jour</p>
-            <p className="text-lg font-semibold">~{avgDailyCalories} kcal</p>
+            <p className="text-muted-foreground">Calories / repas</p>
+            <p className="text-lg font-semibold">~{avgMealCalories} kcal</p>
+            <p className="text-muted-foreground">
+              ≈ {estimatedDailyCalories} kcal/jour ({MEALS_PER_DAY} repas)
+            </p>
             {calorieDelta !== null ? (
               <p
                 className={
@@ -104,20 +108,16 @@ export function PlanNutritionSummary({
             ) : null}
           </div>
           <div>
-            <p className="text-muted-foreground">Protéines / jour</p>
-            <p className="text-lg font-semibold">~{avgDailyProtein} g</p>
+            <p className="text-muted-foreground">Protéines / repas</p>
+            <p className="text-lg font-semibold">~{perMeal(totals.proteinG)} g</p>
           </div>
           <div>
-            <p className="text-muted-foreground">Glucides / jour</p>
-            <p className="text-lg font-semibold">
-              ~{Math.round(totals.carbsG / recipeCount)} g
-            </p>
+            <p className="text-muted-foreground">Glucides / repas</p>
+            <p className="text-lg font-semibold">~{perMeal(totals.carbsG)} g</p>
           </div>
           <div>
-            <p className="text-muted-foreground">Lipides / jour</p>
-            <p className="text-lg font-semibold">
-              ~{Math.round(totals.fatG / recipeCount)} g
-            </p>
+            <p className="text-muted-foreground">Lipides / repas</p>
+            <p className="text-lg font-semibold">~{perMeal(totals.fatG)} g</p>
           </div>
         </div>
       </CardContent>

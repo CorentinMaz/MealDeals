@@ -1,5 +1,6 @@
 import {
   caloriesPerMeal,
+  MEALS_PER_DAY,
   estimateDailyCalories,
 } from "./calorie-target";
 import {
@@ -9,7 +10,6 @@ import {
 
 export function buildNutritionPromptSection(
   profile: NutritionProfileInput,
-  recipeCount: number,
 ): string {
   if (profile.nutritionMode === "recipes_only") {
     return `
@@ -48,13 +48,13 @@ Mode nutrition: objectifs activés mais objectif principal non défini.
 
   let calorieSection = "";
   if (calorieTarget) {
-    const perMeal = caloriesPerMeal(calorieTarget.dailyCalories, recipeCount);
+    const perMeal = caloriesPerMeal(calorieTarget.dailyCalories);
     const source = calorieTarget.isEstimated
       ? "estimé selon objectif et activité"
       : "objectif manuel";
     calorieSection = `
 - Objectif calorique journalier: ~${calorieTarget.dailyCalories} kcal (${source})
-- Cible par repas (sur ${recipeCount} recettes): ~${perMeal} kcal/repas`;
+- Cible par repas (${MEALS_PER_DAY} repas/jour): ~${perMeal} kcal/repas`;
   }
 
   const goalGuidance = goalGuidanceFor(profile.fitnessGoal, profile);

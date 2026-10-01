@@ -74,9 +74,9 @@ export function estimateDailyCalories(
   };
 }
 
-export function caloriesPerMeal(
-  dailyCalories: number,
-  recipeCount: number,
-): number {
-  return Math.round(dailyCalories / Math.max(recipeCount, 1));
+// Each recipe is one meal; a day holds this many main meals.
+export const MEALS_PER_DAY = 3;
+
+export function caloriesPerMeal(dailyCalories: number): number {
+  return Math.round(dailyCalories / MEALS_PER_DAY);
 }

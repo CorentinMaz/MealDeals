@@ -79,7 +79,12 @@ export function GenerateRecipesForm({
           onClick={() =>
             startTransition(async () => {
               try {
-                await generateRecipesAction(Number(recipeCount));
+                const result = await generateRecipesAction(Number(recipeCount));
+                if (result?.error) {
+                  toast.error(
+                    t(`errors.${result.error.code}`, result.error.params),
+                  );
+                }
               } catch (error) {
                 toast.error(getErrorMessage(error, t, "GENERATION_ERROR"));
               }

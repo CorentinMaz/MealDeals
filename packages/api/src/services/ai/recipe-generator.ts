@@ -34,10 +34,7 @@ export async function generateRecipesFromPromotions(
   ].join(", ");
 
   const nutritionProfile = nutritionProfileFromPreferences(input.preferences);
-  const nutritionSection = buildNutritionPromptSection(
-    nutritionProfile,
-    input.recipeCount,
-  );
+  const nutritionSection = buildNutritionPromptSection(nutritionProfile);
   const requireNutrition =
     nutritionProfile.nutritionMode === "guided" &&
     nutritionProfile.fitnessGoal !== null;
